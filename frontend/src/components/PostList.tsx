@@ -1,17 +1,22 @@
-import { useAppSelector } from "../hooks/hooks"
-import { PostItem } from "./PostItem"
+import { useAppSelector, useAppDispatch} from "../hooks/hooks"
+import    PostItem  from "./PostItem"
+import { Button } from "@mui/material" 
+import { selectPostIds, incrementCounter, addPost} from "../store/slices/postsSlice" //memoized selector
+
 export default function PostList() {
-    const postIds = useAppSelector(state => state.posts.map(post => post.id)) 
-    //this always return a new array cause of map causing unnecessary renders reading this now 
-    // https://redux.js.org/usage/deriving-data-selectors#optimizing-selectors-with-memoization
-    //refers this mistake
-    //suppose this was a complex one it would mean for every dispatched action it would be recalculated even though it hasnt actually changed
-    //answer is memoization - if function called with same inputs return previous results
-
-
-    const postList = postIds.map(postId => <PostItem key={postId} id={postId} />)
+    console.log("postList");
+    const dispatch = useAppDispatch()
+    const postIds = useAppSelector(selectPostIds)
+    const postList = postIds.map((postId:string) => <PostItem key={postId} id={postId} />)
     return (
         <div>
+            <Button onClick={() => {
+                const newPostId = String(postIds.length)
+                dispatch(addPost({ id: newPostId,
+            title: `New Post ${newPostId}`,
+            content: `Content for new post ${newPostId}`}))
+            }}>addpost</Button>
+            <Button onClick={() => dispatch(incrementCounter())}>Increment</Button>
             {postList}
         </div>
         
