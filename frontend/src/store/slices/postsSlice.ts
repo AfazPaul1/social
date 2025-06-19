@@ -6,12 +6,12 @@ interface Post {
 }
 const initialState: Post[] = [
     {
-        id: '1',
+        id: '0',
         title: 'First Post!',
         content: 'Hello'
     },
     {
-        id: '2',
+        id: '1',
         title: 'second Post!',
         content: 'Hello'
     }
