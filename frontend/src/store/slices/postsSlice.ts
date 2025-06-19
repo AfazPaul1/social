@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { createSelector } from "@reduxjs/toolkit"
 interface Post {
     id: string,
     title:string,
@@ -26,3 +27,16 @@ const postsSlice = createSlice({
 })
 
 export const postsReducer = postsSlice.reducer
+const selectPostId = (state, postId) => postId;
+
+const selectPosts = state => state.posts;
+
+export const makeSelectPostById = () => {
+  return createSelector(
+    [selectPosts, selectPostId],
+    (posts, id) => {
+      console.log(`makeSelectPostById for ID ${id} is computing! (posts.find)`);
+      return posts.find(post => post.id === id);
+    }
+  );
+};
