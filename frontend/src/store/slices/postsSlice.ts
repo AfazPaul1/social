@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "@reduxjs/toolkit"
+import type { RootState } from "../index";
 interface Post {
     id: string,
     title:string,
@@ -21,15 +22,28 @@ const postsSlice = createSlice({
     name: "posts",
     initialState,
     reducers: {
-
+        addPost: (state, action) => {
+            state.push(action.payload)
+        },
+        incrementCounter: () => {
+            console.log("incrementCounter called in postsSlice - no change to posts");
+        },
+        editPost: (state, action) => {
+            const {id, changes} = action.payload
+            const existingPost = state.find(post => post.id === id)
+            if (existingPost) {
+                Object.assign(existingPost, changes)
+            }
+        }
     }
-
 })
 
 export const postsReducer = postsSlice.reducer
-const selectPostId = (state, postId) => postId;
+export const {incrementCounter, addPost, editPost} = postsSlice.actions
+//selectors
+const selectPostId = (state: RootState, postId: string) => postId;
 
-const selectPosts = state => state.posts;
+const selectPosts = (state: RootState) => state.posts;
 
 export const makeSelectPostById = () => {
   return createSelector(
@@ -40,3 +54,7 @@ export const makeSelectPostById = () => {
     }
   );
 };
+
+export const selectPostIds = createSelector(selectPosts, (posts) => {
+    console.log("selectPostIds is computing! (posts.map)")
+    return posts.map(post => post.id)})
