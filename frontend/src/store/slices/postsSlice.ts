@@ -55,12 +55,12 @@ export const makeSelectPostById = () => {
   return createSelector(
     [selectPosts, selectPostId],
     (posts, id) => {
-      console.log(`makeSelectPostById for ID ${id} is computing! (posts.find)`);
+      //console.log(`makeSelectPostById for ID ${id} is computing! (posts.find)`);
       return posts.find(post => post.id === id);
     }
   );
 };
 
 export const selectPostIds = createSelector(selectPosts, (posts) => {
-    console.log("selectPostIds is computing! (posts.map)")
+    //console.log("selectPostIds is computing! (posts.map)")
     return posts.map(post => post.id)})
