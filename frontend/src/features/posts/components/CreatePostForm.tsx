@@ -12,7 +12,7 @@ export type FormData = {
     }
 function CreatePostForm() {
     const dispatch = useAppDispatch()
-    const {register, handleSubmit, control, formState: {errors, isValid} } = useForm<FormData>({
+    const {register, handleSubmit, control, formState: {errors, isValid}, reset } = useForm<FormData>({
         mode: "onChange", 
         defaultValues: {
             title: "",
@@ -24,9 +24,16 @@ function CreatePostForm() {
             
             <Box className='w-full sm:max-w-xl mx-auto my-2'
                 component="form"
-                onSubmit={handleSubmit(data => dispatch(addPost({ id: nanoid(), ...data})))} //{title: 'a', content: 'a'}
+                onSubmit={
+                    handleSubmit(data => {
+                        dispatch(addPost({ 
+                        id: nanoid(), ...data
+                    }))
+                    reset()
+                    })
+                }
             >
-            <Paper elevation={3} className='flex flex-col gap-4 p-4'>
+            <Paper elevation={3} className='flex flex-col gap-4 p-4 m-2'>
             <TextField 
             label="Post Title"
             sx={{'& .MuiFormHelperText-root': {textAlign: 'right'}}}
