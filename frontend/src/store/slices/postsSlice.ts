@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "@reduxjs/toolkit"
 import type { RootState } from "../index";
+import type { PayloadAction } from "@reduxjs/toolkit";
 interface Post {
     id: string,
     title:string,
@@ -42,10 +43,14 @@ const postsSlice = createSlice({
     name: "posts",
     initialState,
     reducers: {
+      addPost: (state, action:PayloadAction<Post>) => { // since we typed our payload here if we dont pass in a payload of same shape itll show an error there
+        state.push(action.payload)
+      }
     }
 })
 
 export const postsReducer = postsSlice.reducer
+export const {addPost} = postsSlice.actions
 //selectors
 const selectPostId = (state: RootState, postId: string) => postId;
 
