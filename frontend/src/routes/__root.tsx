@@ -17,6 +17,8 @@ export const Route = createRootRoute({
         <Link to='/CreatePostFormPage' className="[&.active]:font-bold">
           Create
         </Link>
+        <Link to="/app"> app
+        </Link>
       </div>
       <hr />
       <Outlet />
