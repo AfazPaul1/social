@@ -6,11 +6,13 @@ import { addPost } from '../../../store/slices/postsSlice';
 import { nanoid } from '@reduxjs/toolkit';
 import WordCount from './WordCount';
 import SaveButton from './SaveButton';
+import { useAddPostsMutation } from '../../../store/apis/postsApi';
 export type FormData = {
         title: string
         content: string
     }
 function CreatePostForm() {
+    const [addPosts, {isLoading: isAddingPost}] = useAddPostsMutation()
     const dispatch = useAppDispatch()
     const {register, handleSubmit, control, formState: {errors, isValid}, reset } = useForm<FormData>({
         mode: "onChange", 
@@ -26,6 +28,7 @@ function CreatePostForm() {
                 component="form"
                 onSubmit={
                     handleSubmit(data => {
+                        addPosts(data)
                         dispatch(addPost({ 
                         id: nanoid(), ...data
                     }))
