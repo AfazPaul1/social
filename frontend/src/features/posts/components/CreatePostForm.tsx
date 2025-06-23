@@ -14,27 +14,33 @@ export type FormData = {
 function CreatePostForm() {
     const [addPosts, {isLoading: isAddingPost}] = useAddPostsMutation()
     const dispatch = useAppDispatch()
-    const {register, handleSubmit, control, formState: {errors, isValid}, reset } = useForm<FormData>({
+    const { handleSubmit, control, formState: { isValid}, reset } = useForm<FormData>({
         mode: "onChange", 
         defaultValues: {
             title: "",
             content: "",
         }
     })
-    return (
-        <div>
-            
-            <Box className='w-full sm:max-w-xl mx-auto my-2'
-                component="form"
-                onSubmit={
-                    handleSubmit(data => {
-                        addPosts(data)
+    const handleCreatePost = handleSubmit(async (data) => {
+                        // const result = await addPosts(data)
+                        //    if(result.data){
+                        //         reset()
+                        //    } 
+                        try {
+                            await addPosts(data).unwrap()
+                            reset()
+                        } catch {
+                            console.log("post failed");
+                        }
                         dispatch(addPost({ 
                         id: nanoid(), ...data
                     }))
-                    reset()
                     })
-                }
+    return (
+        <div>
+            <Box className='w-full sm:max-w-xl mx-auto my-2'
+                component="form"
+                onSubmit={handleCreatePost}
             >
             <Paper elevation={3} className='flex flex-col gap-4 p-4 m-2'>
             <Controller 
@@ -43,6 +49,7 @@ function CreatePostForm() {
                 rules={{required: "This is required",minLength: {value: 5, message: "Minimum length is 5"}}}
                 render={({field, fieldState}) => (
                     <TextField 
+                        disabled={isAddingPost}
                         label="Post Title"
                         sx={{'& .MuiFormHelperText-root': {textAlign: 'right'}}}
                         {...field}
@@ -58,9 +65,12 @@ function CreatePostForm() {
                 rules={{required: "This is required",minLength: {value: 5, message: "Minimum length is 5"}}}
                 render={({field, fieldState}) => (
                     <TextField 
+                        disabled={isAddingPost}
                         label="Post Content"
+                        sx={{'& .MuiFormHelperText-root': {textAlign: 'right'}}}
                         multiline
-                        rows={6}
+                        minRows={5}
+                        maxRows={Infinity}
                         {...field}
                         className='w-full'
                         error={!!fieldState.error} 
@@ -68,7 +78,7 @@ function CreatePostForm() {
                     />
                 )}
             />
-            <SaveButton isValid = {isValid}/>
+            <SaveButton isValid = {isValid} isAddingPost={isAddingPost}/>
             </Paper>
 
             </Box>
