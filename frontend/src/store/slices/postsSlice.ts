@@ -52,7 +52,7 @@ const postsSlice = createSlice({
 export const postsReducer = postsSlice.reducer
 export const {addPost} = postsSlice.actions
 //selectors
-const selectPostId = (state: RootState, postId: string) => postId;
+const selectPostId = (_state: RootState, postId: string) => postId;
 
 const selectPosts = (state: RootState) => state.posts;
 

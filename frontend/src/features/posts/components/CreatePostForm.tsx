@@ -37,12 +37,20 @@ function CreatePostForm() {
                 }
             >
             <Paper elevation={3} className='flex flex-col gap-4 p-4 m-2'>
-            <TextField 
-            label="Post Title"
-            sx={{'& .MuiFormHelperText-root': {textAlign: 'right'}}}
-            {...register("title", {required: "This is required", minLength: {value: 5, message: "Minimum length is 5"}})}
-            error={!!errors.title}
-            helperText={errors.title? errors.title.message : <WordCount control={control}/>}
+            <Controller 
+                name="title"
+                control={control}
+                rules={{required: "This is required",minLength: {value: 5, message: "Minimum length is 5"}}}
+                render={({field, fieldState}) => (
+                    <TextField 
+                        label="Post Title"
+                        sx={{'& .MuiFormHelperText-root': {textAlign: 'right'}}}
+                        {...field}
+                        className='w-full'
+                        error={!!fieldState.error} 
+                        helperText={fieldState.error? fieldState.error.message : <WordCount control={control}/>}
+                    />
+                )}
             />
             <Controller 
                 name="content"
