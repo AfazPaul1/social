@@ -5,7 +5,7 @@ import { Card, CardContent, Typography, Paper} from "@mui/material";
 import {Stack} from "@mui/material";
 import React from "react";
 import ReactMarkdown from 'react-markdown'
-function PostItem({id}: {id: string}){
+function PostItem({id, lineClamp}: {id: string, lineClamp?: string}){
     const selectPostByIdMemo  = useMemo(makeSelectPostById, [])
     //console.log(`PostItem ${id} re-rendering!`);
     const post = useAppSelector(state => selectPostByIdMemo(state, id)) 
@@ -18,7 +18,7 @@ function PostItem({id}: {id: string}){
             <Typography className="text-left">
                 {post?.title}
             </Typography>
-            <Typography className="text-left line-clamp-5" variant="body2" component={"div"}>
+            <Typography className={`text-left ${lineClamp}`} variant="body2" component={"div"}>
                 <ReactMarkdown>{post?.content}</ReactMarkdown>
             </Typography>
         </CardContent>

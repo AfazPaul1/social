@@ -10,21 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as PostsPageRouteImport } from './routes/PostsPage'
 import { Route as CreatePostFormPageRouteImport } from './routes/CreatePostFormPage'
-import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppSettingsRouteImport } from './routes/app/settings'
-import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsPageRoute = PostsPageRouteImport.update({
-  id: '/PostsPage',
-  path: '/PostsPage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreatePostFormPageRoute = CreatePostFormPageRouteImport.update({
@@ -32,91 +25,69 @@ const CreatePostFormPageRoute = CreatePostFormPageRouteImport.update({
   path: '/CreatePostFormPage',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRouteRoute = AppRouteRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRouteRoute,
+const PostsIndexRoute = PostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppRouteRoute,
+const PostsPostIdRoute = PostsPostIdRouteImport.update({
+  id: '/posts/$postId',
+  path: '/posts/$postId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
   '/CreatePostFormPage': typeof CreatePostFormPageRoute
-  '/PostsPage': typeof PostsPageRoute
   '/about': typeof AboutRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/posts': typeof PostsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
   '/CreatePostFormPage': typeof CreatePostFormPageRoute
-  '/PostsPage': typeof PostsPageRoute
   '/about': typeof AboutRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/posts': typeof PostsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
   '/CreatePostFormPage': typeof CreatePostFormPageRoute
-  '/PostsPage': typeof PostsPageRoute
   '/about': typeof AboutRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/posts/': typeof PostsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
     | '/CreatePostFormPage'
-    | '/PostsPage'
     | '/about'
-    | '/app/dashboard'
-    | '/app/settings'
+    | '/posts/$postId'
+    | '/posts'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/app'
-    | '/CreatePostFormPage'
-    | '/PostsPage'
-    | '/about'
-    | '/app/dashboard'
-    | '/app/settings'
+  to: '/' | '/CreatePostFormPage' | '/about' | '/posts/$postId' | '/posts'
   id:
     | '__root__'
     | '/'
-    | '/app'
     | '/CreatePostFormPage'
-    | '/PostsPage'
     | '/about'
-    | '/app/dashboard'
-    | '/app/settings'
+    | '/posts/$postId'
+    | '/posts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRouteRoute: typeof AppRouteRouteWithChildren
   CreatePostFormPageRoute: typeof CreatePostFormPageRoute
-  PostsPageRoute: typeof PostsPageRoute
   AboutRoute: typeof AboutRoute
+  PostsPostIdRoute: typeof PostsPostIdRoute
+  PostsIndexRoute: typeof PostsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -128,25 +99,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/PostsPage': {
-      id: '/PostsPage'
-      path: '/PostsPage'
-      fullPath: '/PostsPage'
-      preLoaderRoute: typeof PostsPageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/CreatePostFormPage': {
       id: '/CreatePostFormPage'
       path: '/CreatePostFormPage'
       fullPath: '/CreatePostFormPage'
       preLoaderRoute: typeof CreatePostFormPageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -156,43 +113,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/settings': {
-      id: '/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRouteRoute
+    '/posts/': {
+      id: '/posts/'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/dashboard': {
-      id: '/app/dashboard'
-      path: '/dashboard'
-      fullPath: '/app/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRouteRoute
+    '/posts/$postId': {
+      id: '/posts/$postId'
+      path: '/posts/$postId'
+      fullPath: '/posts/$postId'
+      preLoaderRoute: typeof PostsPostIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AppRouteRouteChildren {
-  AppDashboardRoute: typeof AppDashboardRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-}
-
-const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppDashboardRoute: AppDashboardRoute,
-  AppSettingsRoute: AppSettingsRoute,
-}
-
-const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
-  AppRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRouteRoute: AppRouteRouteWithChildren,
   CreatePostFormPageRoute: CreatePostFormPageRoute,
-  PostsPageRoute: PostsPageRoute,
   AboutRoute: AboutRoute,
+  PostsPostIdRoute: PostsPostIdRoute,
+  PostsIndexRoute: PostsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
