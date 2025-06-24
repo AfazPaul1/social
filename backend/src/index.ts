@@ -18,3 +18,18 @@ app.post('/posts', async (req: Request, res: Response) => {
     })
     res.json(addedPost)
 })
+
+app.get('/posts', async(req:Request, res: Response) => {
+    const posts = await prisma.post.findMany()
+    res.json(posts)
+})
+
+app.get('/posts/:postId', async(req:Request, res: Response) => {
+    const postId = req.params.postId
+    const post = await prisma.post.findUnique({
+        where: {
+            id: postId
+        }
+    })
+    res.json(post)
+})

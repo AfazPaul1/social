@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit/react";
-import { postsReducer } from "./slices/postsSlice";
+//import { postsReducer } from "./slices/postsSlice";
 import { postsApi } from "./apis/postsApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 export const store = configureStore({
     reducer: {
-    posts: postsReducer,
+    //posts: postsReducer,
     [postsApi.reducerPath]: postsApi.reducer
     },
     middleware: (getDefaultMiddleware) => {

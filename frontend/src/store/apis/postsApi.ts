@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {delay} from '../../utils/delay'
+import type { Post } from "../slices/postsSlice";
 export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
@@ -10,9 +11,11 @@ export const postsApi = createApi(
                 return fetch(...args)
             }
         }),
+        tagTypes: ["Post"],
         endpoints: (builder) => {
             return {
                 addPosts: builder.mutation({
+                    
                     query:(post) => {
                         return {
                             url: '/posts',
@@ -21,9 +24,37 @@ export const postsApi = createApi(
                         }
                     }
                 }),
+                fetchPosts: builder.query<Post[], undefined>({
+                    providesTags:(results) => 
+                        results
+                        ? [
+                            ...results.map((post: Post) => ({type: 'Post' as const, id: post.id}) )
+                        ] 
+                        : []
+                    ,
+                    query: () => {
+                        return {
+                            url:'/posts',
+                            method:'GET'
+                        }
+                    },
+                }),
+                fetchPostsById: builder.query<Post, string>({
+                    providesTags:(result) => 
+                        result
+                        ? [{type: 'Post' as const, id: result.id}]
+                        : []
+                    ,
+                    query: (postId) => {
+                        return {
+                            url: `/posts/${postId}`,
+                            method: 'GET'
+                        }
+                    }
+                })
             }
         }
     }
 )
 
-export const {useAddPostsMutation} = postsApi
+export const {useAddPostsMutation, useFetchPostsQuery, useFetchPostsByIdQuery} = postsApi

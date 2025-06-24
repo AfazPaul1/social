@@ -1,21 +1,18 @@
-import { useAppSelector} from "../hooks/hooks"
 import    PostItem  from "./PostItem"
-import { selectPostIds} from "../store/slices/postsSlice" //memoized selector
-import { Link } from "@tanstack/react-router"
+import { useFetchPostsQuery } from "../store/apis/postsApi"
+import type { Post } from "../store/slices/postsSlice"
+import { useNavigate } from '@tanstack/react-router';
 export default function PostList() {
-    //console.log("postList");
-    const postIds = useAppSelector(selectPostIds)
-    const postList = postIds.map(
-        (postId:string) => 
-        <Link 
-            key={postId} 
-            to={'/posts/$postId'}
-            params={{postId}}
-            >
-        <PostItem  id={postId} lineClamp="line-clamp-5  "/>
-        </Link>)
+    const navigate = useNavigate()
+    const {data:posts} = useFetchPostsQuery(undefined)
+    const postList = posts?.map(
+        (post: Post) => 
+        <div key={post.id} onClick={() => navigate({ to:'/posts/$postId', params: { postId: post.id }, state: { post } })}>           
+        <PostItem  post={post} lineClamp="line-clamp-5"/>
+        </div> 
+        )
     return (
-        <div className="grid sm:max-w-xl mx-auto">
+        <div className="">
             {postList}
         </div>
         
