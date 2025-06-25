@@ -7,6 +7,11 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+function delay(duration: number){
+    return new Promise((resolve) => {
+        setTimeout(resolve, duration);
+    })
+}
 
 app.post('/posts', async (req: Request, res: Response) => {
     const {title, content} = req.body
@@ -21,6 +26,7 @@ app.post('/posts', async (req: Request, res: Response) => {
 
 app.get('/posts', async(req:Request, res: Response) => {
     const posts = await prisma.post.findMany()
+    await delay(2000)
     res.json(posts)
 })
 

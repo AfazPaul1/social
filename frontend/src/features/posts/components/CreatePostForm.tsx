@@ -1,9 +1,9 @@
 import { Paper, TextField, Box,} from '@mui/material';
 import {useForm, Controller} from 'react-hook-form'
 //import { useFormState } from 'react-hook-form';
-import { useAppDispatch } from '../../../hooks/hooks';
-import { addPost } from '../../../store/slices/postsSlice';
-import { nanoid } from '@reduxjs/toolkit';
+//import { useAppDispatch } from '../../../hooks/hooks';
+//import { addPost } from '../../../store/slices/postsSlice';
+//import { nanoid } from '@reduxjs/toolkit';
 import WordCount from './WordCount';
 import SaveButton from './SaveButton';
 import { useAddPostsMutation } from '../../../store/apis/postsApi';
@@ -13,7 +13,7 @@ export type FormData = {
     }
 function CreatePostForm() {
     const [addPosts, {isLoading: isAddingPost}] = useAddPostsMutation()
-    const dispatch = useAppDispatch()
+    //const dispatch = useAppDispatch()
     const { handleSubmit, control, formState: { isValid}, reset } = useForm<FormData>({
         mode: "onChange", 
         defaultValues: {
@@ -32,9 +32,9 @@ function CreatePostForm() {
                         } catch {
                             console.log("post failed");
                         }
-                        dispatch(addPost({ 
-                        id: nanoid(), ...data
-                    }))
+                        //dispatch(addPost({ 
+                        //id: nanoid(), ...data
+                    //}))
                     })
     return (
         <div>

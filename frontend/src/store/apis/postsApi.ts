@@ -6,10 +6,11 @@ export const postsApi = createApi(
         reducerPath: 'postsApi',
         baseQuery: fetchBaseQuery({
             baseUrl: 'http://192.168.1.11:3000',
-            fetchFn: async (...args) => {
-                await delay(2000)
-                return fetch(...args)
-            }
+             fetchFn: async (...args) => {
+                //console.log("api", performance.now());
+                 //await delay(2000)
+                 return fetch(...args)
+             }
         }),
         tagTypes: ["Post"],
         endpoints: (builder) => {
