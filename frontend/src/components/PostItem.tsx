@@ -1,31 +1,51 @@
-import { useAppSelector } from "../hooks/hooks"
-import { useMemo } from "react";
-import { makeSelectPostById } from "../store/slices/postsSlice"; 
-import { Card, CardContent, Typography, Paper} from "@mui/material";
-import {Stack} from "@mui/material";
+import { Card, CardContent, Paper} from "@mui/material";
 import React from "react";
 import ReactMarkdown from 'react-markdown'
-function PostItem({id}: {id: string}){
-    const selectPostByIdMemo  = useMemo(makeSelectPostById, [])
-    //console.log(`PostItem ${id} re-rendering!`);
-    const post = useAppSelector(state => selectPostByIdMemo(state, id)) 
+import type { Post } from "../store/slices/postsSlice";
+ import remarkGfm from 'remark-gfm'
+ import remarkBreaks from 'remark-breaks'
+ import rehypeSanitize from 'rehype-sanitize'
+function PostItem({ post, postsPage}: { post:Post, postsPage?:boolean, }){
+    // const  {data: post} = useFetchPostsQuery(undefined, {
+    //     selectFromResult: ({data}) => ({
+    //         data: data?.find(post => post.id === id)
+    //     })
+    // })
+    let lineClamp; 
+    let hoverStyle;
+    
+    if (postsPage) {
+        lineClamp = "line-clamp-3"
+        hoverStyle = "hover:bg-gray-100 cursor-pointer"
+
+    }
     return (
-        <div className="p-1 m-2">
+        <div className={`w-full mx-auto px-4 max-w-screen-sm py-2  `}>
         <Paper elevation={3} className="">
-            <Stack>
         <Card variant="outlined" >
-        <CardContent>
-            <Typography className="text-left">
+        <CardContent className={`${hoverStyle}`}>
+            <div className="text-left font-semibold text-md">
                 {post?.title}
-            </Typography>
-            <Typography className="text-left line-clamp-5" variant="body2" component={"div"}>
-                <ReactMarkdown>{post?.content}</ReactMarkdown>
-            </Typography>
+            </div>
+            <div className={`text-left ${lineClamp} text-sm list-decimal`}>
+                <MarkReactDown content={post?.content}/>
+            </div>
         </CardContent>
         </Card>
-        </Stack>
         </Paper>
         </div>
     )
+}
+export const MarkReactDown = ({content} : {content:string}) => {
+    return <ReactMarkdown
+                components={{
+                    ol: ({ ...props }) => <ol className="list-decimal pl-6" {...props} />,
+                    a: ({...props}) => <a className="underline text-[#334b5b] break-words" {...props} />
+                }}
+                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                    rehypePlugins={[rehypeSanitize]}
+                >
+                    {content}
+                </ReactMarkdown>
 }
 export default React.memo(PostItem)

@@ -5,11 +5,14 @@ import './index.css'
 import { store } from './store/index.ts'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import {routeTree} from './routeTree.gen.ts'
-
-const router = createRouter({ routeTree })
+import type { Post } from './store/slices/postsSlice.ts'
+const router = createRouter({ routeTree})
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
+  }
+  interface HistoryState {
+    post?:Post
   }
 }
 createRoot(document.getElementById('root')!).render(

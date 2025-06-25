@@ -11,7 +11,7 @@ export const Route = createRootRoute({
         <Link to="/about" className="[&.active]:font-bold">
           About
         </Link>
-        <Link to='/PostsPage' className="[&.active]:font-bold">
+        <Link to='/posts' className="[&.active]:font-bold">
         Posts
         </Link>
         <Link to='/CreatePostFormPage' className="[&.active]:font-bold">
@@ -23,4 +23,5 @@ export const Route = createRootRoute({
       <TanStackRouterDevtools />
     </>
   ),
+  notFoundComponent: () => <div>404 not found</div>
 })
