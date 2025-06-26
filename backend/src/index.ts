@@ -21,7 +21,24 @@ app.post('/posts', async (req: Request, res: Response) => {
             content
         }
     })
+    await delay(2000)
     res.json(addedPost)
+})
+
+app.post('/posts/:postId', async(req:Request, res:Response) => {
+    const postId = req.params.postId
+    const {title, content} = req.body
+    const updatedPost = await prisma.post.update({
+        where: {
+            id: postId
+        },
+        data:{
+            title,
+            content
+        }
+    })
+    await delay(2000)
+    res.json(updatedPost)
 })
 
 app.get('/posts', async(req:Request, res: Response) => {
@@ -37,5 +54,6 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
             id: postId
         }
     })
+    await delay(2000)
     res.json(post)
 })

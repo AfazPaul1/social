@@ -5,7 +5,7 @@ import type { Post } from "../store/slices/postsSlice";
  import remarkGfm from 'remark-gfm'
  import remarkBreaks from 'remark-breaks'
  import rehypeSanitize from 'rehype-sanitize'
-function PostItem({ post, postsPage}: { post:Post, postsPage?:boolean, }){
+function PostItem({ post, postsPage, children}: { post:Post, postsPage?:boolean, children?:React.ReactNode}){
     // const  {data: post} = useFetchPostsQuery(undefined, {
     //     selectFromResult: ({data}) => ({
     //         data: data?.find(post => post.id === id)
@@ -31,6 +31,7 @@ function PostItem({ post, postsPage}: { post:Post, postsPage?:boolean, }){
                 <MarkReactDown content={post?.content}/>
             </div>
         </CardContent>
+        {children && <>{children}</>}
         </Card>
         </Paper>
         </div>
