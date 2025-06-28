@@ -5,7 +5,7 @@ export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
         baseQuery: fetchBaseQuery({
-            baseUrl: 'http://192.168.1.11:3000',
+            baseUrl: 'http://192.168.1.7:3000',
              fetchFn: async (...args) => {
                 //console.log("api", performance.now());
                  //await delay(2000)
@@ -37,13 +37,13 @@ export const postsApi = createApi(
                     }
                 }),
                 fetchPosts: builder.query<Post[], undefined>({
-                    providesTags:(results) => 
-                        results
-                        ? [
-                            ...results.map((post: Post) => ({type: 'Post' as const, id: post.id}) )
-                        ] 
-                        : []
-                    ,
+                    // providesTags:(results) => 
+                    //     results
+                    //     ? [
+                    //         ...results.map((post: Post) => ({type: 'Post' as const, id: post.id}) )
+                    //     ] 
+                    //     : []
+                    // ,
                     query: () => {
                         return {
                             url:'/posts',

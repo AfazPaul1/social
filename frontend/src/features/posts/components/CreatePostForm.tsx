@@ -12,15 +12,6 @@ export type FormData = {
     }
 function CreatePostForm({postId, mode}: {postId?:string, mode?:"edit" | "create"}) {
     const [addPosts, {isLoading: isAddingPost}] = useAddPostsMutation()
-    // const {post}  = useFetchPostsQuery(undefined, {
-    //     selectFromResult: result => ({
-    //         ...result,
-    //         post:result.data?.find(post => post.id === postId)
-            
-    //     })
-    // })
-    //const {title, content} = post
-    //const dispatch = useAppDispatch()
     const {data, isFetching} = useFetchPostsByIdQuery(!postId? skipToken: postId)
     
     const { handleSubmit, control, formState: { isValid}, reset } = useForm<FormData>({
