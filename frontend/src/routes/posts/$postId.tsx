@@ -13,11 +13,12 @@ function RouteComponent() {
   const {postId} = Route.useParams()
   const { location } = useRouterState();
    const preloadedPost = location.state?.post as Post | undefined;
-   const { data, isLoading } = useFetchPostsByIdQuery( preloadedPost? skipToken : postId);
+   const { data, isFetching } = useFetchPostsByIdQuery( preloadedPost? skipToken : postId);
+   //console.log("posts/$postId", performance.now( ));
    const postToDisplay = preloadedPost || data;
   return (
     <>
-      {isLoading? "loading" : postToDisplay
+      {isFetching? "loading" : postToDisplay
       ? 
       <PostItem post = {postToDisplay}>
         <EditButton postId={postToDisplay.id}/>
