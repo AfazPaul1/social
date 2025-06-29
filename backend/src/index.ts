@@ -1,5 +1,8 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import bcrypt from 'bcryptjs'
+import 'dotenv/config'
+const secret_key = process.env.TOKEN_SECRET
+var jwt = require('jsonwebtoken');
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -13,13 +16,23 @@ function delay(duration: number){
         setTimeout(resolve, duration);
     })
 }
-
-app.post('/posts', async (req: Request, res: Response) => {
-    const {title, content} = req.body
+const authenticateToken = async (req:Request, res:Response, next:NextFunction) => {
+    const token = req.headers['authorization']
+    if(token == null) return res.sendStatus(401)
+    try {
+        const decoded = await jwt.verify(token, secret_key)
+        next()
+    } catch (error) {
+        res.status(403).json({message:"wrong token"})
+    }
+}
+app.post('/posts', authenticateToken, async (req: Request, res: Response) => {
+    const {title, content, userId} = req.body
     const addedPost = await prisma.post.create({
         data: {
             title,
-            content
+            content,
+            userId,
         }
     })
     await delay(2000)
@@ -94,49 +107,10 @@ app.post('/register', async (req:Request, res: Response) => {
     if(!user) return  res.status(401).json({message: 'invalid credentials no such user'})
     const isAMatch = await bcrypt.compare(password, user.password)
     if(!isAMatch) return res.status(401).json({message: "invalid credentials wrong password"})
-    res.status(200).json({message: `success login ${isAMatch}`})
+    const token = await jwt.sign({email: user.email}, secret_key)    
+    res.status(200).json({message: `success login ${isAMatch}`, jwt: token})
     } catch (error) {
         res.json(error)
     }
  })
 
-//   app.post('/login', async (req:Request, res: Response) => {
-//     const {email, password} = req.body
-//     try {
-//         //const {password: hashedPassword} = await prisma.user.findUnique({
-//         const {password: hashedPassword} = await prisma.user.findUnique({ 
-//          //the problem with destructuring inline here is that 
-            //suppose theres no matching user our hashedPassword would be an empty object
-            //our if check for when its false would never be encountered
-            //but if we just get whatever it return and no destructure the value would be null
-//         where: {
-//             email
-//         },
-//         select: {
-//             password:true
-//         }
-//         })
-//     //if(!hashedPassword) return  res.status(401).json({message: 'invalid credentials no such user'})
-//     //const isAMatch = await bcrypt.compare(password, hashedPassword)
-//     //if(!isAMatch) return res.status(401).json({message: "invalid credentials wrong password"})
-//     res.json(user)
-//     } catch (error) {
-//         res.json(error)
-//     }
-//  })
-// app.post('/register' async (req:Request, res: Response) => {
-//     const {email, password, name} = req.body
-//     await bcrypt.hash(password, 10,  function(err, hash) {
-        //here we using async and using a callback
-        //istead we should await and then run whatever we wait
-//         const user = await prisma.user.create({
-//             data: {
-//                 email,
-//                 name,
-//                 password:hash
-//             }
-//         })
-//     }) 
-//     res.json(user)
-
-// })
