@@ -55,3 +55,6 @@ main()
     await prisma.$disconnect();
     console.log('Seeding completed.');
   });
+
+  //user1@example.com
+  //wdwwdddwdddddddd

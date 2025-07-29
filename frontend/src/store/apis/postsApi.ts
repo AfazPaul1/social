@@ -1,16 +1,23 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { RootState } from "../../store";
 //import {delay} from '../../utils/delay'
 import type { Post } from "../slices/postsSlice";
 export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
         baseQuery: fetchBaseQuery({
-            baseUrl: 'http://192.168.1.7:3000',
-             fetchFn: async (...args) => {
-                //console.log("api", performance.now());
-                 //await delay(2000)
-                 return fetch(...args)
-             }
+            baseUrl: 'http://192.168.1.14:3000',
+            // fetchFn: async (...args) => {
+            //     //console.log("api", performance.now());
+            //      //await delay(2000)
+            //      return fetch(...args)
+            // },
+            prepareHeaders: (headers, {getState}) => {
+                const token = (getState() as RootState).auth.accessToken
+                if(token) headers.set('authorization', token)
+                return headers
+            }
+            
         }),
         tagTypes: ["Post"],
         endpoints: (builder) => {

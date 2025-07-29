@@ -21,6 +21,14 @@ const authenticateToken = async (req:Request, res:Response, next:NextFunction) =
     if(token == null) return res.sendStatus(401)
     try {
         const decoded = await jwt.verify(token, secret_key)
+        const user = await prisma.user.findUnique({
+            where:{
+                id:decoded.id
+            }
+        })
+        if(!user) return res.status(401).json({message: "no such user"}) 
+        req.body.userId = user.id
+        //console.log(req.body);
         next()
     } catch (error) {
         res.status(403).json({message:"wrong token"})
@@ -39,16 +47,17 @@ app.post('/posts', authenticateToken, async (req: Request, res: Response) => {
     res.json(addedPost)
 })
 
-app.post('/posts/:postId', async(req:Request, res:Response) => {
+app.post('/posts/:postId',authenticateToken, async(req:Request, res:Response) => {
     const postId = req.params.postId
-    const {title, content} = req.body
+    const {title, content, userId} = req.body
     const updatedPost = await prisma.post.update({
         where: {
             id: postId
         },
         data:{
             title,
-            content
+            content,
+            userId
         }
     })
     await delay(2000)
@@ -86,7 +95,7 @@ app.post('/register', async (req:Request, res: Response) => {
             password:hash
         }
     })
-    res.status(201).json({message: "user created successfully"})
+    res.status(201).json({message: "Registered Successfully"})
    } catch (error:any) {
         if(error.code === "P2002") return res.status(409).json({message: "Email already exits"}) //conflict
         res.status(500).json({message:"some error"})
@@ -95,20 +104,29 @@ app.post('/register', async (req:Request, res: Response) => {
 
  app.post('/login', async (req:Request, res: Response) => {
     const {email, password} = req.body
+    await delay(2000)
     try {
         const user = await prisma.user.findUnique({
         where: {
             email
-        },
-        select: {
-            password:true
         }
         })
+    
     if(!user) return  res.status(401).json({message: 'invalid credentials no such user'})
     const isAMatch = await bcrypt.compare(password, user.password)
     if(!isAMatch) return res.status(401).json({message: "invalid credentials wrong password"})
-    const token = await jwt.sign({email: user.email}, secret_key)    
-    res.status(200).json({message: `success login ${isAMatch}`, jwt: token})
+    const token = await jwt.sign({id: user.id}, secret_key)    
+    res.status(200).json({
+        message: `success login ${isAMatch}`, 
+        body: {
+            user:{
+                email:user.email,
+                id:user.id,
+                name:user.name
+            },
+            accessToken: token
+        }
+    })
     } catch (error) {
         res.json(error)
     }
