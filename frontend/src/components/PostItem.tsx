@@ -1,11 +1,11 @@
 import { Card, CardContent, Paper} from "@mui/material";
 import React from "react";
 import ReactMarkdown from 'react-markdown'
-import type { Post } from "../store/slices/postsSlice";
+import type { Post } from "../store/apis/postsApi";
  import remarkGfm from 'remark-gfm'
  import remarkBreaks from 'remark-breaks'
  import rehypeSanitize from 'rehype-sanitize'
-function PostItem({ post, postsPage}: { post:Post, postsPage?:boolean, }){
+function PostItem({ post, postsPage, children}: { post:Post, postsPage?:boolean, children?:React.ReactNode}){
     // const  {data: post} = useFetchPostsQuery(undefined, {
     //     selectFromResult: ({data}) => ({
     //         data: data?.find(post => post.id === id)
@@ -27,10 +27,14 @@ function PostItem({ post, postsPage}: { post:Post, postsPage?:boolean, }){
             <div className="text-left font-semibold text-md">
                 {post?.title}
             </div>
+            <div>
+                {post?.user.name}
+            </div>
             <div className={`text-left ${lineClamp} text-sm list-decimal`}>
                 <MarkReactDown content={post?.content}/>
             </div>
         </CardContent>
+        {children && <>{children}</>}
         </Card>
         </Paper>
         </div>

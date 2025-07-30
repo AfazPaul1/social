@@ -2,11 +2,7 @@
 // import { createSelector } from "@reduxjs/toolkit"
 // import type { RootState } from "../index";
 // import type { PayloadAction } from "@reduxjs/toolkit";
-export interface Post {
-    id: string,
-    title:string,
-    content:string
-}
+
 
 // const postsSlice = createSlice({
 //     name: "posts",

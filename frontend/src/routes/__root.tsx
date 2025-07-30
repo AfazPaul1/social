@@ -14,8 +14,14 @@ export const Route = createRootRoute({
         <Link to='/posts' className="[&.active]:font-bold">
         Posts
         </Link>
-        <Link to='/CreatePostFormPage' className="[&.active]:font-bold">
+        <Link to='/authenticatedRoute/createPost' className="[&.active]:font-bold">
           Create
+        </Link>
+        <Link to='/login' className="[&.active]:font-bold">
+        Login
+        </Link>
+        <Link to='/register' className="[&.active]:font-bold">
+        Register
         </Link>
       </div>
       <hr />
