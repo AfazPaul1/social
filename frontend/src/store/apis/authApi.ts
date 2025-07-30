@@ -4,7 +4,7 @@ import {login} from '../index'
 export const authApi = createApi({
     reducerPath:"authApi",
     baseQuery:fetchBaseQuery({
-        baseUrl:'http://192.168.1.14:3000',
+        baseUrl:'http://192.168.1.5:3000',
         
     }),
     endpoints(builder) {

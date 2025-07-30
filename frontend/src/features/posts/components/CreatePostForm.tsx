@@ -27,16 +27,16 @@ function CreatePostForm({postId, mode}: {postId?:string, mode?:"edit" | "create"
         reset({title: data?.title, content: data?.content})
     }, [data, reset])
     const handleCreatePost = handleSubmit(async (data) => {
-                        try {
-                            await addPosts(data).unwrap()
-                            reset()
-                        } catch {
-                            console.log("post failed");
-                        }
-                    })
-                    console.log(data);
-                    
-    const [editPost, {isLoading: isEditingPost}] = useEditPostMutation()
+        try {
+            await addPosts(data).unwrap()
+            reset()
+        } catch {
+            console.log("post failed");
+        }
+    })
+    //if the userId of this post doesnt match the user id of the logged in user it will reject the response so the mutation will be rejected so we get that error and display
+    //alternatively we could not show the edit at all if user id's dont match in the post item component               
+    const [editPost, {isLoading: isEditingPost, error}] = useEditPostMutation()
     const navigate = useNavigate()
     const handleEditPost = handleSubmit(async (data) => {
         
@@ -51,7 +51,10 @@ function CreatePostForm({postId, mode}: {postId?:string, mode?:"edit" | "create"
     let content;
     if (isFetching) {
         content="loading"
-    } else {
+    } else if (error){
+        content="perm error"
+    }
+    else {
         content=<>
         <Box className='w-full sm:max-w-xl mx-auto my-2'
                 component="form"

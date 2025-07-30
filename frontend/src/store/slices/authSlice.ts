@@ -28,4 +28,6 @@ export const authSlice = createSlice({
     }
 })
 
+//i need this selectAccesstoken inside authenticated routes for checking whether there is any logged in user if its null then we redirect to login
 export const selectAccessToken = (state:RootState) => state.auth.accessToken
+export const selectLoggedInUserId = (state:RootState) => state.auth.user.id

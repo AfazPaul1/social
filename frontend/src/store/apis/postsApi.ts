@@ -1,12 +1,23 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../../store";
 //import {delay} from '../../utils/delay'
-import type { Post } from "../slices/postsSlice";
+//gues i need to change this type everytime i change the api response
+export interface Post {
+    id: string,
+    title:string,
+    content:string,
+    createdAt:string,
+    updatedAt:string,
+    userId:string,
+    user:{
+        name:string
+    }
+}
 export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
         baseQuery: fetchBaseQuery({
-            baseUrl: 'http://192.168.1.14:3000',
+            baseUrl: 'http://192.168.1.5:3000',
             // fetchFn: async (...args) => {
             //     //console.log("api", performance.now());
             //      //await delay(2000)
@@ -37,7 +48,7 @@ export const postsApi = createApi(
                     query:({title, content, postId}) => {
                         return {
                             url: `/posts/${postId}`,
-                            method:'POST',
+                            method:'PATCH',
                             body: {title, content}
                         }
 
