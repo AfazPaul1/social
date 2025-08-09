@@ -1,22 +1,15 @@
 import    PostItem  from "./PostItem"
 import { useFetchPostsQuery } from "../store/apis/postsApi"
-import type { Post } from "../store/slices/postsSlice"
+import type { Post } from "../store/apis/postsApi";
 import { useNavigate } from '@tanstack/react-router';
 import { Skeleton } from "@mui/material";
-//import React, { useEffect } from "react";
-//let renderCount = 0
  function PostList() {
-  //renderCount++
-  //console.log(`🔁 PostList render #${renderCount}`)
     const navigate = useNavigate()
     const {data:posts, isFetching} = useFetchPostsQuery(undefined)
     let content;
-    //console.log("useFetchPostsQuery", { posts, isFetching })
      if (isFetching) {
-         //console.log("loading",isFetching,  performance.now());
          content = <SkeletonSus/>
     } else if(posts && posts.length) {
-        //console.log("comprender", performance.now());
         content = posts?.map(
         (post: Post) => 
         <div key={post.id} onClick={() => navigate({ to:'/posts/$postId', params: { postId: post.id }, state: { post } })}>           
@@ -24,18 +17,10 @@ import { Skeleton } from "@mui/material";
         </div> 
         )
     }
-//     useEffect(() => {
-//   console.log('🧹 PostList mounted')
-//   return () => {
-//     console.log('❌ PostList unmounted')
-//   }
-// }, [])
     return (
-            //<Suspense fallback={<SkeletonSus />}>
                 <>
                 {content}
                 </>
-            //</Suspense> 
     )
 }
 export default PostList
