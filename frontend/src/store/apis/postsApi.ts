@@ -17,7 +17,7 @@ export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
         baseQuery: fetchBaseQuery({
-            baseUrl: 'http://192.168.1.5:3000',
+            baseUrl: import.meta.env.VITE_API_URL,
             // fetchFn: async (...args) => {
             //     //console.log("api", performance.now());
             //      //await delay(2000)

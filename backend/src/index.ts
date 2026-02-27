@@ -8,10 +8,29 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const cors = require('cors')
 const app = express();
-app.use(cors())
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : []
+app.use(cors({
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
-function delay(duration: number){
+const PORT = process.env.PORT || 3000; 
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+});function delay(duration: number){
     return new Promise((resolve) => {
         setTimeout(resolve, duration);
     })
