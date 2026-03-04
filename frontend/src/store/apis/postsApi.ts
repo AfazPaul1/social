@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../../store";
+import { createEntityAdapter, type EntityState } from "@reduxjs/toolkit";
 //import {delay} from '../../utils/delay'
 //gues i need to change this type everytime i change the api response
 export interface Post {
@@ -13,6 +14,12 @@ export interface Post {
         name:string
     }
 }
+
+const postsAdaptor = createEntityAdapter<Post>({
+    sortComparer: (a,b) => a.updatedAt.localeCompare(b.updatedAt)
+})
+const initalState = postsAdaptor.getInitialState()
+
 export const postsApi = createApi(
     {
         reducerPath: 'postsApi',
@@ -41,7 +48,8 @@ export const postsApi = createApi(
                             method:'POST',
                             body: post
                         }
-                    }
+                    },
+                    
                 }),
                 editPost: builder.mutation({
                     invalidatesTags: (_result, _error, {postId}) => [{type: "Post", id:postId}],
@@ -51,23 +59,26 @@ export const postsApi = createApi(
                             method:'PATCH',
                             body: {title, content}
                         }
-
-                    }
+                    },
+                    
                 }),
-                fetchPosts: builder.query<Post[], undefined>({
-                    // providesTags:(results) => 
-                    //     results
-                    //     ? [
-                    //         ...results.map((post: Post) => ({type: 'Post' as const, id: post.id}) )
-                    //     ] 
-                    //     : []
-                    // ,
+                fetchPosts: builder.query<EntityState<Post, string>, void>({
+                    providesTags:(results) => 
+                        results
+                        ? [
+                            ...results.ids.map((id: string) => ({type: 'Post' as const, id}) )
+                        ] 
+                        : []
+                    ,
                     query: () => {
                         return {
                             url:'/posts',
                             method:'GET'
                         }
                     },
+                    transformResponse: (res:Post[]) => {
+                        return postsAdaptor.setAll(initalState, res)
+                    }
                 }),
                 fetchPostsById: builder.query<Post, string>({
                     providesTags:(result) => 
