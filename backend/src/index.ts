@@ -156,7 +156,7 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
             }
         }
     })
-    await delay(2000)
+    await delay(10000)
     res.json(post)
 })
 

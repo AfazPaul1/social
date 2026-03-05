@@ -1,31 +1,35 @@
 import { createFileRoute } from '@tanstack/react-router'
 import PostItem from '../../components/PostItem'
-import { useFetchPostsByIdQuery } from '../../store/apis/postsApi'
-import { useRouterState } from '@tanstack/react-router'
-import { skipToken } from '@reduxjs/toolkit/query'
-import type { Post } from '../../store/apis/postsApi'
+import { postsApi, useFetchPostsByIdQuery } from '../../store/apis/postsApi'
 import { Button, CardActions,} from "@mui/material";
 import { selectLoggedInUserId } from '../../store/slices/authSlice'
 import { store } from '../../store'
+import type { Post } from "../../store/apis/postsApi";
+import { selectPostsFromAnywhere } from "../../store/apis/postsApi";
+ import { useSelector } from "react-redux";
+ import { type RootState } from "../../store";
 export const Route = createFileRoute('/posts/$postId')({
+  loader: async ({params}) => {
+    //const {postId} = Route.useParams() no need for this can access in parameters
+    store.dispatch(postsApi.endpoints.fetchPostsById.initiate(params.postId))
+    return null
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const {postId} = Route.useParams()
-  const { location } = useRouterState();
-  const preloadedPost = location.state?.post as Post | undefined;
-  const { data, isFetching } = useFetchPostsByIdQuery( preloadedPost? skipToken : postId);
+  const { isFetching } = useFetchPostsByIdQuery( postId);
+  const post:Post = useSelector((state: RootState) => selectPostsFromAnywhere(state, postId))!
   //console.log("posts/$postId", performance.now( ));
-  const postToDisplay = preloadedPost || data;
-  const isSameUser = selectLoggedInUserId(store.getState()) === postToDisplay?.userId
+  const isSameUser = selectLoggedInUserId(store.getState()) === post?.userId
   return (
     <>
-      {isFetching? "loading" : postToDisplay
+      {isFetching && !post? "loading" : post
       ? 
-      <PostItem post = {postToDisplay}>
+      <PostItem postId={post.id}>
         {/* if lhs true return rhs */}
-        {isSameUser && <EditButton postId={postToDisplay.id}/>}
+        {isSameUser && <EditButton postId={post.id}/>}
       </PostItem> : "no such post"}
     </>
   )

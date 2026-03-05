@@ -1,6 +1,5 @@
 import    PostItem  from "./PostItem"
 import { useFetchPostsQuery } from "../store/apis/postsApi"
-import type { Post } from "../store/apis/postsApi";
 import { useNavigate } from '@tanstack/react-router';
 import { Skeleton } from "@mui/material";
  function PostList() {
@@ -9,14 +8,11 @@ import { Skeleton } from "@mui/material";
     let content;
      if (isFetching) {
          content = <SkeletonSus/>
-    } else if(posts && posts.length) {
-        content = posts?.map(
-        (post: Post) => 
-        //the reason i pass it here in the url state is for the separate postid page and i pass it as props here for this current page
-        //ive read that both are not the correct ways i should be doing i should only be passing ids and let the post be fetched in the component. this ensures that while im rendering or navigating i get the fresh data and not frozen ones
-        //it also helps me with adding the latest post to the top and normalization etc.
-        <div key={post.id} onClick={() => navigate({ to:'/posts/$postId', params: { postId: post.id }, state: { post } })}>           
-        <PostItem  post={post} postsPage/>
+    } else if(posts && posts.ids.length) {
+        content = posts.ids?.map(   
+        (id: string) => 
+        <div key={id} onClick={() => navigate({ to:'/posts/$postId', params: { postId: id } })}>           
+        <PostItem  postId={id} postsPage/>
         </div> 
         )
     }

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../../store";
-import { createEntityAdapter, type EntityState } from "@reduxjs/toolkit";
+import { createEntityAdapter, createSelector, type EntityState } from "@reduxjs/toolkit";
 //import {delay} from '../../utils/delay'
 //gues i need to change this type everytime i change the api response
 export interface Post {
@@ -16,7 +16,7 @@ export interface Post {
 }
 
 const postsAdaptor = createEntityAdapter<Post>({
-    sortComparer: (a,b) => a.updatedAt.localeCompare(b.updatedAt)
+    sortComparer: (a,b) => b.updatedAt.localeCompare(a.updatedAt)//its currently in ascending so reversed
 })
 const initalState = postsAdaptor.getInitialState()
 
@@ -97,5 +97,26 @@ export const postsApi = createApi(
         }
     }
 )
+const getPostsResult = postsApi.endpoints.fetchPosts.select()
+//const getPostsByIdResult = postsApi.endpoints.fetchPostsById.select(postId) looks like have to create a selector which passes postId
+const getPostsData = createSelector(getPostsResult, result => result.data ?? initalState)
 
 export const {useAddPostsMutation, useEditPostMutation, useFetchPostsQuery, useFetchPostsByIdQuery} = postsApi
+export const {selectAll: selectAllPosts, selectById: selectPostById} = postsAdaptor.getSelectors(getPostsData)
+export const selectPostsFromAnywhere = createSelector(
+    [   
+        (state: RootState, postId:string) => selectPostById(state, postId),
+        (state: RootState, postId:string) => postsApi.endpoints.fetchPostsById.select(postId)(state).data
+    ],
+    (postFromList, postFromQuery) => {
+    if (postFromList) {
+      console.log('Source: Normalized List Cache');
+      return postFromList;
+    }
+    if (postFromQuery) {
+      console.log('Source: Single Post Query Cache');
+      return postFromQuery;
+    }
+  } 
+
+)
