@@ -1,4 +1,4 @@
-import { Card, CardContent, Paper} from "@mui/material";
+import { Card, CardContent, CardHeader, Paper} from "@mui/material";
 import React from "react";
 import ReactMarkdown from 'react-markdown'
 import type { Post } from "../store/apis/postsApi";
@@ -8,6 +8,7 @@ import { selectPostsFromAnywhere } from "../store/apis/postsApi";
  import rehypeSanitize from 'rehype-sanitize'
  import { useSelector } from "react-redux";
  import { type RootState } from "../store";
+ import timeAgo from "../utils/timeAgo";
 function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:boolean, children?:React.ReactNode}){
     //triggers fetchposts if i navigate to posts/$postid and theres no fetchposts cache
     const post:Post = useSelector((state: RootState) => selectPostsFromAnywhere(state, postId))! //temp non null assertion cause im logging in selectpostsfromanywhere selector where ill beusing nullish coalescing instead which ensures no undefined return
@@ -23,10 +24,11 @@ function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:bo
         <div className={`w-full mx-auto px-4 max-w-screen-sm py-2  `}>
         <Paper elevation={3} className="">
         <Card variant="outlined" >
+            <CardHeader
+                title={post?.title}
+                subheader={timeAgo(post?.createdAt)}
+            />
         <CardContent className={`${hoverStyle}`}>
-            <div className="text-left font-semibold text-md">
-                {post?.title}
-            </div>
             <div>
                 {post?.user.name}
             </div>
