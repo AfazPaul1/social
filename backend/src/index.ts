@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from 'bcryptjs'
 import 'dotenv/config'
+import { Prisma } from "@prisma/client";
 const secret_key = process.env.TOKEN_SECRET
 var jwt = require('jsonwebtoken');
 const express = require('express');
@@ -212,34 +213,74 @@ app.post('/login', async (req:Request, res: Response) => {
 })
 
 app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) => {
-    console.log("Reaction route hit!")
-    const {postId, reactionType} = req.body
+    const {postId, reactionType:type} = req.body
     const {id:userId} = req.user!
     try {
-        const reaction = await prisma.Reaction.upsert({
-        where: {
-            reactionId: {
+        const reaction = await prisma.Reaction.create({
+            data: {
                 userId,
                 postId,
-            },
-        },
-        update: {
-            type: reactionType,
-        },
-        create: {
-            userId,
-            postId,
-            type: reactionType,
-        }
-    })
-    res.status(200).json({
-        body: reaction
-    })
-    } catch (error) {
-        res.json({
-            message:"etf",
-            error
+                type
+            }
         })
+        return res.status(200).json({
+            message: "reaction created",
+            body: {
+                reaction
+            }
+        })
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+            try {
+                const {count} = await prisma.Reaction.deleteMany({
+                    where: {
+                    userId, postId, type
+                    } 
+                })
+                if(count === 1) {
+                    return res.status(200).json({
+                        message: "deleted"
+                    })
+                } 
+                if(count === 0) {
+                    try {
+                        const updated = await prisma.Reaction.update({
+                            where: {
+                                reactionId: {
+                                    userId,
+                                    postId,
+                                }
+                            },
+                            data: {
+                                type
+                            }
+                        })
+                        return res.status(200).json({
+                            message: "updated",
+                            body: {
+                                updated
+                            }
+                        })
+
+                    } catch (e) {
+                        res.json({
+                            message:"failed updation",
+                            e
+                        })
+                    }
+                }          
+                } catch (e) {
+                    res.json({
+                        message: "failed deletion"
+                    })
+                }   
+        }
+        res.status(500).json({
+            message:"etf",
+            e
+        })
+        throw e
     }
 })
+
 
