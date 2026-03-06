@@ -15,6 +15,8 @@ model Post {
   updatedAt DateTime @updatedAt @default(now())
   userId    String  
   user      User     @relation(fields: [userId], references: [id])
+  reactions Reaction[]
+
 }
 
 model User {
@@ -24,10 +26,30 @@ model User {
   name  String
   posts Post[] 
   role Role @default(USER)
+   reactions Reaction[]
 }
 
 enum Role {
   USER
   MODERATOR
   ADMIN
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  SAD
+  WOW
+  HAHA
+  ANGRY
+}
+
+model Reaction {
+  userId String
+  postId String
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references:[id])
+  type ReactionType
+  createdAt DateTime @default(now())
+  @@id(name:"reactionId", [postId, userId])
 }

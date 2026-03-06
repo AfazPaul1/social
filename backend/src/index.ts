@@ -211,3 +211,35 @@ app.post('/login', async (req:Request, res: Response) => {
     }
 })
 
+app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) => {
+    console.log("Reaction route hit!")
+    const {postId, reactionType} = req.body
+    const {id:userId} = req.user!
+    try {
+        const reaction = await prisma.Reaction.upsert({
+        where: {
+            reactionId: {
+                userId,
+                postId,
+            },
+        },
+        update: {
+            type: reactionType,
+        },
+        create: {
+            userId,
+            postId,
+            type: reactionType,
+        }
+    })
+    res.status(200).json({
+        body: reaction
+    })
+    } catch (error) {
+        res.json({
+            message:"etf",
+            error
+        })
+    }
+})
+
