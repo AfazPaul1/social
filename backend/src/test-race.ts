@@ -165,3 +165,71 @@ simulateDoubleClick();
 //         }
 //     }
 // });
+
+// app.post('/reaction', authenticateToken, async (req: modRequest, res: Response) => {
+//     const { postId, reactionType: type } = req.body;
+//     const { id: userId } = req.user!;
+
+//     try {
+//         // All DB operations inside this block are now Atomic
+//         const result = await prisma.$transaction(async (tx) => {
+//             try {
+//                 const reaction = await tx.reaction.create({
+//                     data: { userId, postId, type }
+//                 });
+//                 return { status: 200, message: "reaction created", body: { reaction } };
+//             } catch (e: any) {
+//                 // If record exists, P2002 is thrown
+//                 if (e.code === "P2002") {
+//                     // 1. Try to delete (Toggle off)
+//                     const { count } = await tx.reaction.deleteMany({
+//                         where: { userId, postId, type }
+//                     });
+
+//                     if (count === 1) {
+//                         return { status: 200, message: "deleted" };
+//                     }
+
+//                     // 2. If nothing was deleted, it's a different type, so update
+//                     if (count === 0) {
+//                         const updated = await tx.reaction.update({
+//                             where: {
+//                                 userId_postId: { userId, postId }
+//                             },
+//                             data: { type }
+//                         });
+//                         return { status: 200, message: "updated", body: { updated } };
+//                     }
+//                 }
+//                 throw e; // Crash the transaction if it's a different error
+//             }
+//         }, {
+//             // Optional: Increase isolation level if your DB supports it
+//             // isolationLevel: Prisma.TransactionIsolationLevel.Serializable 
+//         });
+
+//         // The transaction returned our object, now we send it to the client
+//         return res.status(result.status).json({
+//             message: result.message,
+//             body: result.body
+//         });
+
+//     } catch (e: any) {
+//         console.error("Transaction failed:", e.message);
+//         return res.status(500).json({
+//             message: "Something went wrong",
+//             error: e.message
+//         });
+//     }
+// });
+
+// λ npx tsx test-race.ts
+// 🚀 [1772899322608] Launching simultaneous requests...
+// [1772899322814] Req 1 Finished: reaction created
+// [1772899322830] Req 2 Finished: reaction deleted
+
+// C:\Users\afazp\OneDrive\Documents\GitHub\social\backend\src (feature/Normalize-State-and-Implement-Post-Reactivity -> origin)
+// λ npx tsx test-race.ts
+// 🚀 [1772899400491] Launching simultaneous requests...
+// [1772899400528] Req 2 Finished: reaction deleted
+// [1772899400555] Req 1 Error: Something went wrong

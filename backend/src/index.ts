@@ -216,71 +216,57 @@ app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) =
     const {postId, reactionType:type} = req.body
     const {id:userId} = req.user!
     try {
-        const reaction = await prisma.Reaction.create({
-            data: {
-                userId,
-                postId,
-                type
-            }
-        })
-        return res.status(200).json({
-            message: "reaction created",
-            body: {
-                reaction
-            }
-        })
-    } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-            try {
-                const {count} = await prisma.Reaction.deleteMany({
-                    where: {
-                    userId, postId, type
-                    } 
-                })
-                if(count === 1) {
-                    return res.status(200).json({
-                        message: "deleted"
-                    })
-                } 
-                if(count === 0) {
-                    try {
-                        const updated = await prisma.Reaction.update({
-                            where: {
-                                reactionId: {
-                                    userId,
-                                    postId,
-                                }
-                            },
-                            data: {
-                                type
-                            }
-                        })
-                        return res.status(200).json({
-                            message: "updated",
-                            body: {
-                                updated
-                            }
-                        })
-
-                    } catch (e) {
-                        res.json({
-                            message:"failed updation",
-                            e
-                        })
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {   
+            const reactionItem =  await tx.reaction.findUnique({
+                where:{
+                    reactionId:{
+                        userId,
+                        postId,
+                    },
+                    type
+                }
+            })
+            if (!reactionItem) {
+                const upserted = await tx.reaction.upsert({
+                    where:{
+                        reactionId: {
+                            userId,
+                            postId,
+                        } 
+                    },
+                    update: {
+                            type
+                        },
+                    create: {
+                        userId,
+                        postId,
+                        type
                     }
-                }          
-                } catch (e) {
-                    res.json({
-                        message: "failed deletion"
-                    })
-                }   
-        }
-        res.status(500).json({
-            message:"etf",
-            e
+                })
+                return { status: 200, message: "reaction created", body: { upserted } };
+            } else {
+                const deleted = await tx.reaction.delete({
+                    where:{
+                        reactionId: {
+                            userId,
+                            postId,
+                        } 
+                    },
+                })
+                return { status: 200, message: "reaction deleted", body: { deleted } };
+            }
         })
-        throw e
-    }
+        return res.status(result.status).json({
+            message: result.message,
+            body:result.body
+        })
+    } catch (e: any) {
+        console.error("Transaction failed:", e.message);
+        return res.status(500).json({
+            message: "Something went wrong",
+            error: e.message
+        });
+    }  
 })
 
 
