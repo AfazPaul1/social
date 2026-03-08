@@ -217,44 +217,33 @@ app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) =
     const {id:userId} = req.user!
     try {
         const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {   
-            const reactionItem =  await tx.reaction.findUnique({
+            const {count} =  await tx.reaction.deleteMany({
                 where:{
-                    reactionId:{
+                    userId,
+                    postId,
+                    type   
+                }
+            })
+            if (count === 1) {
+                return {status:200, message:"deleted"}
+            }
+            const upserted = await tx.reaction.upsert({
+                where:{
+                    reactionId: {
                         userId,
                         postId,
+                    } 
+                },
+                update: {
+                        type
                     },
+                create: {
+                    userId,
+                    postId,
                     type
                 }
             })
-            if (!reactionItem) {
-                const upserted = await tx.reaction.upsert({
-                    where:{
-                        reactionId: {
-                            userId,
-                            postId,
-                        } 
-                    },
-                    update: {
-                            type
-                        },
-                    create: {
-                        userId,
-                        postId,
-                        type
-                    }
-                })
-                return { status: 200, message: "reaction created", body: { upserted } };
-            } else {
-                const deleted = await tx.reaction.delete({
-                    where:{
-                        reactionId: {
-                            userId,
-                            postId,
-                        } 
-                    },
-                })
-                return { status: 200, message: "reaction deleted", body: { deleted } };
-            }
+            return { status: 200, message: "reaction created", body: { upserted } };        
         })
         return res.status(result.status).json({
             message: result.message,
