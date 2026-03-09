@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from 'bcryptjs'
 import 'dotenv/config'
-import { Prisma } from "@prisma/client";
+import { Prisma, ReactionType } from "@prisma/client";
 const secret_key = process.env.TOKEN_SECRET
 var jwt = require('jsonwebtoken');
 const express = require('express');
@@ -123,29 +123,19 @@ app.get('/posts', async(req:Request, res: Response) => {
             user:{
                 select: {
                     name:true
-                }
-            }
+                }     
+            },
+            //reactions:true
+            
         }
     })
     await delay(2000)
     res.json(posts)
 })
-
+type reactionCounts = Record<ReactionType, number>
 app.get('/posts/:postId', async(req:Request, res: Response) => {
     const postId = req.params.postId
     const post = await prisma.post.findUnique({
-        //incorrect way 
-        //saw some syntax related to this in relation queries - relation filters
-        // where: {
-        //     id: postId,
-        //     include: {
-        //         user: {
-        //             select: {
-        //                 name:true
-        //             }
-        //         }
-        //     }
-        // }
         where: {
             id: postId,
         },
@@ -154,11 +144,60 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
                 select: {
                     name:true
                 }
-            }
+            },
+           //reactions:true this returns all reaction but we just need the count
         }
     })
-    await delay(10000)
-    res.json(post)
+    // const reactionCounts = await prisma.reaction.findMany({
+    //     where: {
+    //         postId
+    //     }
+    // }) cant use findmany here this would just give all reaction then we would have to count manually
+    const reactionCounts = await prisma.reaction.groupBy({
+        by:'type',
+        where: {
+            postId
+        },
+        _count:{
+            type:true
+        }
+    })
+
+//     interface reactionCountsType {
+//     "SAD":number,
+//     "ANGRY":Number,
+//     "WOW":Number,
+//     "HAHA":Number,
+//     "LOVE":Number,
+//     "LIKE":Number,
+// }
+//     const reactionCountsNew:reactionCountsType = {
+//         "SAD":0,
+//         "ANGRY":0,
+//         "WOW":0,
+//         "HAHA":0,
+//         "LOVE":0,
+//         "LIKE":0,
+//     }
+//     const keys = Object.keys(reactionCounts)
+//     for (const key in keys) {
+//         reactionCountsNew[reactionCounts[key].type] = reactionCounts[keys[0]]._count.type;         //this is causing a error cause reactionCountsNew.value can be only those 6 values but we are not gauranteed that reactionCounts[key].type will certainly only give those 6 values cause we dont know its types
+//     }
+
+    const formattedCounts:reactionCounts = {
+        SAD:0,
+        ANGRY:0,
+        WOW:0,
+        HAHA:0,
+        LOVE:0,
+        LIKE:0,
+    }
+    //reaction counts was actaully an array i assumed it was an object but it was cause i spread it.
+    reactionCounts.forEach((item:any) => {
+        formattedCounts[item.type as ReactionType] = item._count.type
+    })
+    await delay(1000)
+    res.json({...post, reactionCounts: formattedCounts})
 })
 
 
