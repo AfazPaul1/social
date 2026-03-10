@@ -3,6 +3,8 @@ import type { RootState } from "../../store";
 import { createEntityAdapter, createSelector, type EntityState } from "@reduxjs/toolkit";
 //import {delay} from '../../utils/delay'
 //gues i need to change this type everytime i change the api response
+export type reactionCountsType =  Record<ReactionType, number>
+export type ReactionType = 'LIKE' | 'LOVE' | 'SAD' | 'WOW' | 'HAHA' | 'ANGRY';
 export interface Post {
     id: string,
     title:string,
@@ -12,7 +14,9 @@ export interface Post {
     userId:string,
     user:{
         name:string
-    }
+    },
+    reactionCounts?:reactionCountsType
+    
 }
 
 const postsAdaptor = createEntityAdapter<Post>({
