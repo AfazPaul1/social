@@ -6,7 +6,9 @@ const secret_key = process.env.TOKEN_SECRET
 var jwt = require('jsonwebtoken');
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'], //to log the postgres query that is executed
+});
 const cors = require('cors')
 const app = express();
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
@@ -125,12 +127,50 @@ app.get('/posts', async(req:Request, res: Response) => {
                     name:true
                 }     
             },
-            //reactions:true
-            
         }
     })
+    const postIds = posts.map((p:any) => p.id)
+    const rawCounts = await prisma.Reaction.groupBy({
+        by:['postId', 'type'],
+        where:{
+            postId : {
+                in: postIds
+            }
+        },
+        _count:{
+            type:true
+        }
+
+    })
+    const countsMap = new Map<string, Record<ReactionType, number>>()
+    rawCounts.forEach((item:any) => {
+        
+        
+        if(!countsMap.has(item.postId)) {
+            countsMap.set(item.postId, {
+                "SAD":0,
+                "ANGRY":0,
+                "WOW":0,
+                "HAHA":0,
+                "LOVE":0,
+                "LIKE":0,   
+            })
+        }
+        const record = countsMap.get(item.postId)!
+        record[item.type as ReactionType] = item._count.type
+    })
+
+    const modifiedPosts = posts.map((post:any) => {
+        const reactionCounts = countsMap.get(post.id)
+        return {
+            ...post,
+            reactionCounts
+        }
+    })
+    
     await delay(2000)
-    res.json(posts)
+    
+    res.json(modifiedPosts)
 })
 type reactionCounts = Record<ReactionType, number>
 app.get('/posts/:postId', async(req:Request, res: Response) => {

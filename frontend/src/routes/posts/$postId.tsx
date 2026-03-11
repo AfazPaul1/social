@@ -8,7 +8,7 @@ import type { Post } from "../../store/apis/postsApi";
 import { selectPostsFromAnywhere } from "../../store/apis/postsApi";
  import { useSelector } from "react-redux";
  import { type RootState } from "../../store";
- import ReactionPicker from '../../features/reactions/components/ReactionPicker.tsx';
+// import ReactionPicker from '../../features/reactions/components/ReactionPicker.tsx';
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({params}) => {
     //const {postId} = Route.useParams() no need for this can access in parameters
@@ -30,7 +30,7 @@ function RouteComponent() {
       ? 
       <PostItem postId={post.id}>
         {/* if lhs true return rhs */}
-        <ReactionPicker reactionCounts = {post.reactionCounts}></ReactionPicker>
+        {/* <ReactionPicker reactionCounts = {post.reactionCounts}></ReactionPicker> */}
         {isSameUser && <EditButton postId={post.id}/>}
       </PostItem> : "no such post"}
     </>

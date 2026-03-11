@@ -9,6 +9,7 @@ import { selectPostsFromAnywhere } from "../store/apis/postsApi";
  import { useSelector } from "react-redux";
  import { type RootState } from "../store";
  import timeAgo from "../utils/timeAgo";
+import ReactionPicker from "../features/reactions/components/ReactionPicker";
 function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:boolean, children?:React.ReactNode}){
     //triggers fetchposts if i navigate to posts/$postid and theres no fetchposts cache
     const post:Post = useSelector((state: RootState) => selectPostsFromAnywhere(state, postId))! //temp non null assertion cause im logging in selectpostsfromanywhere selector where ill beusing nullish coalescing instead which ensures no undefined return
@@ -35,6 +36,7 @@ function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:bo
             <div className={`text-left ${lineClamp} text-sm list-decimal`}>
                 <MarkReactDown content={post?.content}/>
             </div>
+            <ReactionPicker reactionCounts = {post.reactionCounts}></ReactionPicker> 
         </CardContent>
         {children && <>{children}</>}
         </Card>

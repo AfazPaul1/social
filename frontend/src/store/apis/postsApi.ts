@@ -15,7 +15,7 @@ export interface Post {
     user:{
         name:string
     },
-    reactionCounts?:reactionCountsType
+    reactionCounts:reactionCountsType
     
 }
 
