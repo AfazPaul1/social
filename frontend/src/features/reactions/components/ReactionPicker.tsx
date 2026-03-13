@@ -11,7 +11,7 @@ const reactionIcons: Record<ReactionType, IconType>  = {
     "LOVE":FaHeart,
     "LIKE":FaRegThumbsUp,
 }
-function ReactionPicker({reactionCounts, postId, userReaction} : {reactionCounts: Record<ReactionType, number>, postId:string, userReaction:string}) {
+function ReactionPicker({reactionCounts, postId, userReaction} : {reactionCounts: Record<ReactionType, number>, postId:string, userReaction:string|null}) {
     const [addReaction] = useAddReactionMutation()
     const handleClick = (postId:string, reactionType:ReactionType) => {
         addReaction({postId, reactionType})

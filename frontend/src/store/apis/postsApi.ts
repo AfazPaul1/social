@@ -13,7 +13,7 @@ export interface Post {
     updatedAt:string,
     userId:string,
     userName:string,
-    userReaction:string,
+    userReaction:string | null,
     reactionCounts:reactionCountsType
     
 }
@@ -102,6 +102,31 @@ export const postsApi = createApi(
                             url:`/reaction`,
                             method:'POST',
                             body: {postId, reactionType}
+                        }
+                    },
+                    async onQueryStarted({postId}, {dispatch, queryFulfilled}) {
+                        try {
+                            const {data} = await queryFulfilled
+                            dispatch(postsApi.util.updateQueryData('fetchPosts', undefined, (draft) => {
+                                const post =draft.entities[postId]
+                                const {action, type, previousType} = data.body.reactionResponse
+                                if(action === "CREATED") {
+                                    post.reactionCounts[type as ReactionType] +=1
+                                    post.userReaction = type
+                                } 
+                                else if (action === "DELETED") {
+                                    post.reactionCounts[type as ReactionType] -=1
+                                    post.userReaction = null
+                                } 
+                                else if (action === "UPDATED") {
+                                    post.reactionCounts[previousType as ReactionType] -=1
+                                    post.reactionCounts[type as ReactionType] +=1
+                                    post.userReaction = type
+                                }
+                            }))
+                        } catch (e) {
+                            console.log(e);
+                            
                         }
                     }
                 })

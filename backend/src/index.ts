@@ -134,17 +134,6 @@ app.get('/posts', optionalAuth ,async(req:modRequest, res: Response) => {
             }) 
         }
     })
-    
-    //abandoned cause read that shape the response, instead of mutating DB objects
-    // if (currentUserId) {
-    //     posts = posts.map((post:any) => {
-    //         const userReaction = post.reactions[0]?.type || null
-    //         delete post.reactions //i havent verified whether this is an actual performance improvement over destructuring
-    //         post.userReaction = userReaction
-    //         return post
-    //     })
-    // }
-    
     const postIds = posts.map((p:any) => p.id)
     const rawCounts = await prisma.Reaction.groupBy({
         by:['postId', 'type'],
@@ -160,8 +149,6 @@ app.get('/posts', optionalAuth ,async(req:modRequest, res: Response) => {
     })
     const countsMap = new Map<string, Record<ReactionType, number>>()
     rawCounts.forEach((item:any) => {
-        
-        
         if(!countsMap.has(item.postId)) {
             countsMap.set(item.postId, {
                 "SAD":0,
@@ -186,7 +173,7 @@ app.get('/posts', optionalAuth ,async(req:modRequest, res: Response) => {
             updatedAt:post.updatedAt,
             userId:post.userId,
             userName: post.user.name,
-            userReaction:post.reactions?.[0]?.type || null, //reactions wont exist if user not logged in
+            userReaction:post.reactions?.[0]?.type ?? null, //reactions wont exist if user not logged in
             reactionCounts:countsMap.get(post.id)  
         }
         )
@@ -198,7 +185,8 @@ app.get('/posts', optionalAuth ,async(req:modRequest, res: Response) => {
     res.json(modifiedPosts)
 })
 type reactionCounts = Record<ReactionType, number>
-app.get('/posts/:postId', async(req:Request, res: Response) => {
+app.get('/posts/:postId', optionalAuth,async(req:modRequest, res: Response) => {
+    const currentUserId = req.user?.id    
     const postId = req.params.postId
     const post = await prisma.post.findUnique({
         where: {
@@ -210,14 +198,14 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
                     name:true
                 }
             },
-           //reactions:true this returns all reaction but we just need the count
+           ...(currentUserId && { 
+                reactions: {
+                where: { userId: currentUserId },
+                select: { type: true }, 
+                },
+            })
         }
     })
-    // const reactionCounts = await prisma.reaction.findMany({
-    //     where: {
-    //         postId
-    //     }
-    // }) cant use findmany here this would just give all reaction then we would have to count manually
     const reactionCounts = await prisma.reaction.groupBy({
         by:'type',
         where: {
@@ -227,28 +215,7 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
             type:true
         }
     })
-
-//     interface reactionCountsType {
-//     "SAD":number,
-//     "ANGRY":Number,
-//     "WOW":Number,
-//     "HAHA":Number,
-//     "LOVE":Number,
-//     "LIKE":Number,
-// }
-//     const reactionCountsNew:reactionCountsType = {
-//         "SAD":0,
-//         "ANGRY":0,
-//         "WOW":0,
-//         "HAHA":0,
-//         "LOVE":0,
-//         "LIKE":0,
-//     }
-//     const keys = Object.keys(reactionCounts)
-//     for (const key in keys) {
-//         reactionCountsNew[reactionCounts[key].type] = reactionCounts[keys[0]]._count.type;         //this is causing a error cause reactionCountsNew.value can be only those 6 values but we are not gauranteed that reactionCounts[key].type will certainly only give those 6 values cause we dont know its types
-//     }
-
+    console.log(reactionCounts);
     const formattedCounts:reactionCounts = {
         SAD:0,
         ANGRY:0,
@@ -261,8 +228,25 @@ app.get('/posts/:postId', async(req:Request, res: Response) => {
     reactionCounts.forEach((item:any) => {
         formattedCounts[item.type as ReactionType] = item._count.type
     })
+    function formatPost(post:any)
+    {   
+        return (
+            {
+            id:post.id,
+            title:post.title,
+            content:post.content,
+            createdAt:post.createdAt,
+            updatedAt:post.updatedAt,
+            userId:post.userId,
+            userName: post.user.name,
+            userReaction:post.reactions?.[0]?.type ?? null, //reactions wont exist if user not logged in
+            reactionCounts:formattedCounts  
+        }
+        )
+    }
+    const modifiedPosts = formatPost(post)
     await delay(1000)
-    res.json({...post, reactionCounts: formattedCounts})
+    res.json(modifiedPosts)
 })
 
 
@@ -317,40 +301,73 @@ app.post('/login', async (req:Request, res: Response) => {
 })
 type ReactionAction = "CREATED" | "UPDATED" | "DELETED";
 interface reactionResponse {
-
+    action:ReactionAction,
+    postId:string,
+    type:ReactionType,
+    previousType?:ReactionType
 }
 app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) => {
     const {postId, reactionType:type} = req.body
     const {id:userId} = req.user!
     try {
         const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {   
-            const {count} =  await tx.reaction.deleteMany({
-                where:{
-                    userId,
-                    postId,
-                    type   
-                }
-            })
-            if (count === 1) {
-                return {status:200, message:"deleted"}
-            }
-            const upserted = await tx.reaction.upsert({
+            const reactionItem = await tx.reaction.findUnique({
                 where:{
                     reactionId: {
                         userId,
                         postId,
-                    } 
-                },
-                update: {
-                        type
-                    },
-                create: {
-                    userId,
-                    postId,
-                    type
+                    }   
                 }
-            })
-            return { status: 200, message: "reaction created", body: { upserted } };        
+            }) 
+            if(!reactionItem) {
+                const reaction = await tx.reaction.create({
+                    data:{
+                        userId,
+                        postId,
+                        type
+                    }
+                })
+                return {status: 200, message: "created", body: {reactionResponse: {
+                    action:"CREATED",
+                    postId:reaction.postId,
+                    type:reaction.type
+                }}}
+            }
+            else {
+                if(reactionItem.type === type) {
+                    const reaction = await tx.reaction.delete({
+                        where:{
+                            reactionId: {
+                                userId,
+                                postId,
+                            }   
+                        }
+                    })
+                return {status: 200, message: "deleted", body: {reactionResponse: {
+                    action:"DELETED",
+                    postId:reaction.postId,
+                    type:reaction.type
+                }}}
+                } else {
+                    const reaction = await tx.reaction.update({
+                        where:{
+                            reactionId: {
+                                userId,
+                                postId,
+                            } 
+                        },
+                        data: {
+                            type
+                        }
+                    })
+                    return {status: 200, message: "updated", body: {reactionResponse: {
+                    action:"UPDATED",
+                    postId:reaction.postId,
+                    type:reaction.type,
+                    previousType:reactionItem.type
+                }}}
+                }
+            }
         })
         return res.status(result.status).json({
             message: result.message,
