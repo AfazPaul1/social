@@ -1,6 +1,6 @@
 SELECT * FROM public."Reaction"
-where "userId"='cmcdp44zr0000buiohxoyrzle'
-ORDER BY "userId" ASC, "postId" ASC 
+where "postId"='cmmdrcwwq0001bus4jhcizsi8'
+ORDER BY "type" ASC;
 
 SELECT reltuples::bigint AS estimated_rows
 FROM pg_class

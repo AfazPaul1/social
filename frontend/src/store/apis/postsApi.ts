@@ -12,9 +12,8 @@ export interface Post {
     createdAt:string,
     updatedAt:string,
     userId:string,
-    user:{
-        name:string
-    },
+    userName:string,
+    userReaction:string,
     reactionCounts:reactionCountsType
     
 }
@@ -96,6 +95,15 @@ export const postsApi = createApi(
                             method: 'GET'
                         }
                     }
+                }),
+                addReaction: builder.mutation({
+                    query:({postId, reactionType})=>{
+                        return {
+                            url:`/reaction`,
+                            method:'POST',
+                            body: {postId, reactionType}
+                        }
+                    }
                 })
             }
         }
@@ -105,7 +113,7 @@ const getPostsResult = postsApi.endpoints.fetchPosts.select()
 //const getPostsByIdResult = postsApi.endpoints.fetchPostsById.select(postId) looks like have to create a selector which passes postId
 const getPostsData = createSelector(getPostsResult, result => result.data ?? initalState)
 
-export const {useAddPostsMutation, useEditPostMutation, useFetchPostsQuery, useFetchPostsByIdQuery} = postsApi
+export const {useAddPostsMutation, useEditPostMutation, useFetchPostsQuery, useFetchPostsByIdQuery, useAddReactionMutation} = postsApi
 export const {selectAll: selectAllPosts, selectById: selectPostById} = postsAdaptor.getSelectors(getPostsData)
 export const selectPostsFromAnywhere = createSelector(
     [   

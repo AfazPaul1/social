@@ -1,14 +1,8 @@
 import type { IconType } from 'react-icons';
 import type { ReactionType} from '../../../store/apis/postsApi'
 import { FaAngry, FaHeart,  FaRegSadCry, FaFire,  FaRegSmile, FaRegThumbsUp} from "react-icons/fa";
-// const reactionCountsNew:reactionCountsType = {
-//         "SAD":0,
-//         "ANGRY":0,
-//         "WOW":0,
-//         "HAHA":0,
-//         "LOVE":0,
-//         "LIKE":0,
-//     } // backend handles defaults like angry:0 so no need 
+import {useAddReactionMutation} from '../../../store/apis/postsApi'
+import styles from './ReactionPicker.module.css'
 const reactionIcons: Record<ReactionType, IconType>  = {
     "SAD":FaRegSadCry,
     "ANGRY":FaAngry,
@@ -17,12 +11,19 @@ const reactionIcons: Record<ReactionType, IconType>  = {
     "LOVE":FaHeart,
     "LIKE":FaRegThumbsUp,
 }
-function ReactionPicker({reactionCounts} : {reactionCounts: Record<ReactionType, number>}) {
-    const reactions = Object.entries(reactionCounts).map(([key, value], index) => {
+function ReactionPicker({reactionCounts, postId, userReaction} : {reactionCounts: Record<ReactionType, number>, postId:string, userReaction:string}) {
+    const [addReaction] = useAddReactionMutation()
+    const handleClick = (postId:string, reactionType:ReactionType) => {
+        addReaction({postId, reactionType})
+    }
+    const reactions = Object.entries(reactionCounts).map(([key, value]) => {
         const Icon = reactionIcons[key as ReactionType] //had to use a type assertion because Object.entries() always types keys as string even if the original object has more specific keys like we had
+        const active = key === userReaction
         return (
-            <div key={index}>
-                <Icon />
+            <div key={key}>
+                <button className={active? styles.active :""} onClick={() => handleClick(postId, key as ReactionType)}>
+                    <Icon />
+                </button>
                 <div style={{textAlign:"center"}}>{value}</div>
             </div>
         )

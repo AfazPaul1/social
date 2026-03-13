@@ -31,12 +31,12 @@ function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:bo
             />
         <CardContent className={`${hoverStyle}`}>
             <div>
-                {post?.user.name}
+                {post?.userName}
             </div>
             <div className={`text-left ${lineClamp} text-sm list-decimal`}>
                 <MarkReactDown content={post?.content}/>
             </div>
-            <ReactionPicker reactionCounts = {post.reactionCounts}></ReactionPicker> 
+            <ReactionPicker reactionCounts = {post.reactionCounts} postId= {post.id} userReaction={post.userReaction}></ReactionPicker> 
         </CardContent>
         {children && <>{children}</>}
         </Card>

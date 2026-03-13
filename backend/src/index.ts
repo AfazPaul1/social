@@ -5,10 +5,8 @@ import { Prisma, ReactionType } from "@prisma/client";
 const secret_key = process.env.TOKEN_SECRET
 var jwt = require('jsonwebtoken');
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'], //to log the postgres query that is executed
-});
+import prisma from './lib/prisma'
+import {optionalAuth} from './middleware/auth.middleware'
 const cors = require('cors')
 const app = express();
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
@@ -44,7 +42,7 @@ export interface modRequest extends Request {
     user?: {
         id:string,
         role: "USER" | "MODERATOR" | "ADMIN"
-    }
+    } | null
 }
 const authenticateToken = async (req:modRequest, res:Response, next:NextFunction) => {
     const token = req.headers['authorization']
@@ -119,7 +117,8 @@ app.patch('/posts/:postId',authenticateToken, async(req:modRequest, res:Response
     res.json(updatedPost)
 })
 
-app.get('/posts', async(req:Request, res: Response) => {
+app.get('/posts', optionalAuth ,async(req:modRequest, res: Response) => {
+    const currentUserId = req.user?.id    
     const posts = await prisma.post.findMany({
         include: {
             user:{
@@ -127,8 +126,25 @@ app.get('/posts', async(req:Request, res: Response) => {
                     name:true
                 }     
             },
+            ...(currentUserId && { //conditional include using spread
+                reactions: {
+                where: { userId: currentUserId },
+                select: { type: true }, 
+                },
+            }) 
         }
     })
+    
+    //abandoned cause read that shape the response, instead of mutating DB objects
+    // if (currentUserId) {
+    //     posts = posts.map((post:any) => {
+    //         const userReaction = post.reactions[0]?.type || null
+    //         delete post.reactions //i havent verified whether this is an actual performance improvement over destructuring
+    //         post.userReaction = userReaction
+    //         return post
+    //     })
+    // }
+    
     const postIds = posts.map((p:any) => p.id)
     const rawCounts = await prisma.Reaction.groupBy({
         by:['postId', 'type'],
@@ -159,17 +175,26 @@ app.get('/posts', async(req:Request, res: Response) => {
         const record = countsMap.get(item.postId)!
         record[item.type as ReactionType] = item._count.type
     })
-
-    const modifiedPosts = posts.map((post:any) => {
-        const reactionCounts = countsMap.get(post.id)
-        return {
-            ...post,
-            reactionCounts
+    function formatPost(post:any)
+    {   
+        return (
+            {
+            id:post.id,
+            title:post.title,
+            content:post.content,
+            createdAt:post.createdAt,
+            updatedAt:post.updatedAt,
+            userId:post.userId,
+            userName: post.user.name,
+            userReaction:post.reactions?.[0]?.type || null, //reactions wont exist if user not logged in
+            reactionCounts:countsMap.get(post.id)  
         }
-    })
-    
+        )
+    } 
+    const modifiedPosts = posts.map((post:any) => {
+        return formatPost(post)
+    }) 
     await delay(2000)
-    
     res.json(modifiedPosts)
 })
 type reactionCounts = Record<ReactionType, number>
@@ -290,7 +315,10 @@ app.post('/login', async (req:Request, res: Response) => {
         res.json(error)
     }
 })
+type ReactionAction = "CREATED" | "UPDATED" | "DELETED";
+interface reactionResponse {
 
+}
 app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) => {
     const {postId, reactionType:type} = req.body
     const {id:userId} = req.user!
