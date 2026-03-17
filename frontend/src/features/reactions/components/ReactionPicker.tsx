@@ -3,6 +3,9 @@ import type { ReactionType} from '../../../store/apis/postsApi'
 import { FaAngry, FaHeart,  FaRegSadCry, FaFire,  FaRegSmile, FaRegThumbsUp} from "react-icons/fa";
 import {useAddReactionMutation} from '../../../store/apis/postsApi'
 import styles from './ReactionPicker.module.css'
+import {selectUserReactionFromPosts, selectReactionCountsFromPosts} from '../selectors/ReactionSelectors'
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../../store';
 const reactionIcons: Record<ReactionType, IconType>  = {
     "SAD":FaRegSadCry,
     "ANGRY":FaAngry,
@@ -11,8 +14,10 @@ const reactionIcons: Record<ReactionType, IconType>  = {
     "LOVE":FaHeart,
     "LIKE":FaRegThumbsUp,
 }
-function ReactionPicker({reactionCounts, postId, userReaction} : {reactionCounts: Record<ReactionType, number>, postId:string, userReaction:string|null}) {
+function ReactionPicker({ postId} : {postId:string}) {
     const [addReaction] = useAddReactionMutation()
+    const reactionCounts = useSelector((state:RootState) => selectReactionCountsFromPosts(state, postId))
+    const userReaction = useSelector((state:RootState) => selectUserReactionFromPosts(state, postId))
     const handleClick = (postId:string, reactionType:ReactionType) => {
         addReaction({postId, reactionType})
     }

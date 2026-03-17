@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import PostItem from '../../components/PostItem'
 import { postsApi, useFetchPostsByIdQuery } from '../../store/apis/postsApi'
-import { Button, CardActions,} from "@mui/material";
 import { selectLoggedInUserId } from '../../store/slices/authSlice'
 import { store } from '../../store'
 import type { Post } from "../../store/apis/postsApi";
 import { selectPostsFromAnywhere } from "../../store/apis/postsApi";
  import { useSelector } from "react-redux";
  import { type RootState } from "../../store";
+ import EditButton from '../../features/posts/components/EditButton'
 // import ReactionPicker from '../../features/reactions/components/ReactionPicker.tsx';
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({params}) => {
@@ -35,15 +35,4 @@ function RouteComponent() {
       </PostItem> : "no such post"}
     </>
   )
-}
-import { useNavigate } from '@tanstack/react-router'
-function EditButton({postId}: {postId:string}) {
-  const navigate = useNavigate()
-  return <CardActions>
-            <Button  onClick={() => navigate({
-              to:'/authenticatedRoute/editPost/$postId',
-              params: {postId},
-              search:{mode:"edit"}
-            })}>Edit</Button>
-        </CardActions>
 }

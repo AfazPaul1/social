@@ -21,7 +21,7 @@ export interface Post {
 const postsAdaptor = createEntityAdapter<Post>({
     sortComparer: (a,b) => b.updatedAt.localeCompare(a.updatedAt)//its currently in ascending so reversed
 })
-const initalState = postsAdaptor.getInitialState()
+export const initalPostsState = postsAdaptor.getInitialState()
 
 export const postsApi = createApi(
     {
@@ -80,7 +80,7 @@ export const postsApi = createApi(
                         }
                     },
                     transformResponse: (res:Post[]) => {
-                        return postsAdaptor.setAll(initalState, res)
+                        return postsAdaptor.setAll(initalPostsState, res)
                     }
                 }),
                 fetchPostsById: builder.query<Post, string>({
@@ -136,13 +136,13 @@ export const postsApi = createApi(
 )
 const getPostsResult = postsApi.endpoints.fetchPosts.select()
 //const getPostsByIdResult = postsApi.endpoints.fetchPostsById.select(postId) looks like have to create a selector which passes postId
-const getPostsData = createSelector(getPostsResult, result => result.data ?? initalState)
+const getPostsData = createSelector(getPostsResult, result => result.data ?? initalPostsState)
 
 export const {useAddPostsMutation, useEditPostMutation, useFetchPostsQuery, useFetchPostsByIdQuery, useAddReactionMutation} = postsApi
-export const {selectAll: selectAllPosts, selectById: selectPostById} = postsAdaptor.getSelectors(getPostsData)
+export const {selectAll: selectAllPosts, selectById: selectPostByIdFromPosts, selectIds} = postsAdaptor.getSelectors(getPostsData)
 export const selectPostsFromAnywhere = createSelector(
     [   
-        (state: RootState, postId:string) => selectPostById(state, postId),
+        (state: RootState, postId:string) => selectPostByIdFromPosts(state, postId),
         (state: RootState, postId:string) => postsApi.endpoints.fetchPostsById.select(postId)(state).data
     ],
     (postFromList, postFromQuery) => {
@@ -155,5 +155,4 @@ export const selectPostsFromAnywhere = createSelector(
       return postFromQuery;
     }
   } 
-
 )
