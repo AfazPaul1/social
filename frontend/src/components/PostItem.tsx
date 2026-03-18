@@ -21,10 +21,15 @@ function PostItem({ postId, postsPage, children}: { postId:string, postsPage?:bo
         hoverStyle = "hover:bg-gray-100 cursor-pointer"
 
     }
+    const handleClick = () => {
+        if(postsPage) {
+            navigate({ to:'/posts/$postId', params: { postId } })
+        }        
+    }
     return (
         <div className={`w-full mx-auto px-4 max-w-screen-sm py-2  `}>
         <Paper elevation={3} className="">
-        <Card variant="outlined" onClick={() => navigate({ to:'/posts/$postId', params: { postId } })}>
+        <Card variant="outlined" onClick={handleClick}>
             <CardHeader
                 title={title}
                 subheader={timeAgo(createdAt)}

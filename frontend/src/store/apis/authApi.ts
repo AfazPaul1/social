@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {  createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {login} from '../index'
+import { postsApi } from "./postsApi";
 
 export const authApi = createApi({
     reducerPath:"authApi",
@@ -20,6 +21,7 @@ export const authApi = createApi({
                 async onQueryStarted(_user, {dispatch, queryFulfilled}) {
                     try{
                         const {data} = await queryFulfilled
+                        dispatch(postsApi.util.resetApiState())
                         dispatch(login(data.body))
                     } catch{
                         console.log("no login");

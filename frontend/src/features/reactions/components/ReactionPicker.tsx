@@ -6,6 +6,7 @@ import styles from './ReactionPicker.module.css'
 import {selectUserReactionFromPosts, selectReactionCountsFromPosts} from '../selectors/ReactionSelectors'
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../store';
+import { selectLoggedInUserId } from '../../../store/slices/authSlice';
 const reactionIcons: Record<ReactionType, IconType>  = {
     "SAD":FaRegSadCry,
     "ANGRY":FaAngry,
@@ -18,8 +19,9 @@ function ReactionPicker({ postId} : {postId:string}) {
     const [addReaction] = useAddReactionMutation()
     const reactionCounts = useSelector((state:RootState) => selectReactionCountsFromPosts(state, postId))
     const userReaction = useSelector((state:RootState) => selectUserReactionFromPosts(state, postId))
+    const loggedInUserId = useSelector(selectLoggedInUserId)
     const handleClick = (postId:string, reactionType:ReactionType) => {
-        addReaction({postId, reactionType})
+        if(loggedInUserId) addReaction({postId, reactionType})
     }
     const reactions = Object.entries(reactionCounts).map(([key, value]) => {
         const Icon = reactionIcons[key as ReactionType] //had to use a type assertion because Object.entries() always types keys as string even if the original object has more specific keys like we had

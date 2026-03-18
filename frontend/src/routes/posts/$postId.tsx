@@ -3,15 +3,15 @@ import PostItem from '../../components/PostItem'
 import { postsApi, useFetchPostsByIdQuery } from '../../store/apis/postsApi'
 import { selectLoggedInUserId } from '../../store/slices/authSlice'
 import { store } from '../../store'
-import type { Post } from "../../store/apis/postsApi";
-import { selectPostsFromAnywhere } from "../../store/apis/postsApi";
- import { useSelector } from "react-redux";
+import {selectPostUserIdFromPosts} from '../../features/posts/selectors/selectors'
+import { useSelector } from "react-redux";
  import { type RootState } from "../../store";
  import EditButton from '../../features/posts/components/EditButton'
 // import ReactionPicker from '../../features/reactions/components/ReactionPicker.tsx';
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({params}) => {
     //const {postId} = Route.useParams() no need for this can access in parameters
+    await store.dispatch(postsApi.endpoints.fetchPosts.initiate(undefined))
     store.dispatch(postsApi.endpoints.fetchPostsById.initiate(params.postId))
     return null
   },
@@ -20,19 +20,23 @@ export const Route = createFileRoute('/posts/$postId')({
 
 function RouteComponent() {
   const {postId} = Route.useParams()
-  const { isFetching } = useFetchPostsByIdQuery( postId);
-  const post:Post = useSelector((state: RootState) => selectPostsFromAnywhere(state, postId))!
-  //console.log("posts/$postId", performance.now( ));
-  const isSameUser = selectLoggedInUserId(store.getState()) === post?.userId
-  return (
-    <>
-      {isFetching && !post? "loading" : post
-      ? 
-      <PostItem postId={post.id}>
-        {/* if lhs true return rhs */}
-        {/* <ReactionPicker reactionCounts = {post.reactionCounts}></ReactionPicker> */}
-        {isSameUser && <EditButton postId={post.id}/>}
-      </PostItem> : "no such post"}
-    </>
-  )
+  const { isFetching, isError } = useFetchPostsByIdQuery(postId, {
+      selectFromResult: ({ isFetching, isError }) => ({
+        isFetching, 
+        isError
+      })
+  });
+  const loggedInUser = useSelector(selectLoggedInUserId)
+  const postUserId = useSelector((state:RootState) => selectPostUserIdFromPosts(state, postId))
+  const isSameUser = loggedInUser === postUserId
+  if(isFetching) return "loading.."
+  if(isError) return "no such post"
+  if(postUserId) {
+    return (
+            <PostItem postId={postId}>
+        {isSameUser && <EditButton postId={postId}/>}
+      </PostItem> 
+
+    )
+  }  
 }

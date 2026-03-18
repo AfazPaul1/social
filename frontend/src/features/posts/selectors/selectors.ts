@@ -10,3 +10,5 @@ export const selectPostCreatedAtFromPosts = (state: RootState, postId: string) =
 
 export const selectPostUserNameFromPosts = (state: RootState, postId: string) =>
   selectPostByIdFromPosts(state, postId)?.userName
+export const selectPostUserIdFromPosts = (state: RootState, postId: string) =>
+  selectPostByIdFromPosts(state, postId)?.userId
