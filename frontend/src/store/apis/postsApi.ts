@@ -97,35 +97,35 @@ export const postsApi = createApi(
                     }
                 }),
                 addReaction: builder.mutation({
-                    query:({postId, reactionType})=>{
+                    query:({postId, reactionType, userReaction})=>{
                         return {
                             url:`/reaction`,
                             method:'POST',
-                            body: {postId, reactionType}
+                            body: {postId, reactionType, userReaction}
                         }
                     },
-                    async onQueryStarted({postId}, {dispatch, queryFulfilled}) {
-                        try {
-                            const {data} = await queryFulfilled
-                            dispatch(postsApi.util.updateQueryData('fetchPosts', undefined, (draft) => {
-                                const post =draft.entities[postId]
-                                const {action, type, previousType} = data.body.reactionResponse
-                                if(action === "CREATED") {
+                    async onQueryStarted({postId, reactionType:type, userReaction:previousType}, lifecycleApi) {
+                        const getPostsPatchResult = lifecycleApi.dispatch(postsApi.util.updateQueryData('fetchPosts', undefined, (draft) => {
+                                const post = draft.entities[postId]
+                                if(!previousType) {
                                     post.reactionCounts[type as ReactionType] +=1
                                     post.userReaction = type
                                 } 
-                                else if (action === "DELETED") {
+                                else if (previousType === type) {
                                     post.reactionCounts[type as ReactionType] -=1
                                     post.userReaction = null
                                 } 
-                                else if (action === "UPDATED") {
+                                else {
                                     post.reactionCounts[previousType as ReactionType] -=1
                                     post.reactionCounts[type as ReactionType] +=1
                                     post.userReaction = type
                                 }
                             }))
-                        } catch (e) {
-                            console.log(e);
+                        try {
+                            await lifecycleApi.queryFulfilled
+                            
+                        } catch {
+                            getPostsPatchResult.undo()
                             
                         }
                     }

@@ -369,6 +369,7 @@ app.post('/reaction', authenticateToken ,async (req:modRequest, res: Response) =
                 }
             }
         })
+        await delay(3000)
         return res.status(result.status).json({
             message: result.message,
             body:result.body
