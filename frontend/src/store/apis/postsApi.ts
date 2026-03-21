@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../../store";
 import { createEntityAdapter, createSelector, type EntityState } from "@reduxjs/toolkit";
+import { delay } from "../../utils/delay";
 //import {delay} from '../../utils/delay'
 //gues i need to change this type everytime i change the api response
 export type reactionCountsType =  Record<ReactionType, number>
@@ -105,6 +106,7 @@ export const postsApi = createApi(
                         }
                     },
                     async onQueryStarted({postId, reactionType:type, userReaction:previousType}, lifecycleApi) {
+                        //await delay(3000)
                         const getPostsPatchResult = lifecycleApi.dispatch(postsApi.util.updateQueryData('fetchPosts', undefined, (draft) => {
                                 const post = draft.entities[postId]
                                 if(!previousType) {
