@@ -25,6 +25,7 @@ function ReactionPicker({ postId} : {postId:string}) {
     const userReaction = useSelector((state:RootState) => selectUserReactionFromPosts(state, postId))
     const loggedInUserId = useSelector(selectLoggedInUserId)
     const [animating, setAnimating] = useState<string | null>(null)
+    const [rejected, setRejected] = useState<boolean>(false)
 
     //tried using state to animate counts. similar to how i use animating but having that class toggling logic is frustrating 
     //const [bump, setBump] = useState<string | null>(null)
@@ -50,7 +51,10 @@ function ReactionPicker({ postId} : {postId:string}) {
     const handleClick = async (postId:string, reactionType:ReactionType) => {
         //await delay(3000)
         setAnimating(reactionType)
-        if (inFlightRef.current) return
+        if (inFlightRef.current) {
+            setRejected(true)
+            return
+        }
         inFlightRef.current = true
         try {
             if(loggedInUserId) await addReaction({postId, reactionType, userReaction}).unwrap()
@@ -67,11 +71,12 @@ function ReactionPicker({ postId} : {postId:string}) {
             <div key={key}>
                 <button 
                     //disabled={isLoading} //this is suppposed to be only ui but im using server state to block clicks 
-                    className={`${animating === key ? styles.pop : ""} ${active ? styles.active : ""}`} 
+                    className={`${animating === key ? styles.pop : ""} ${active ? styles.active : ""} ${rejected && animating === key? styles.shake: ""}`} 
                     onClick={() => handleClick(postId, key as ReactionType)}
                     onAnimationEnd={() => {
                         //console.log("render setAnimating(null)", performance.now())
                         setAnimating(null)
+                        setRejected(false)
                     }}
                 >
                     <Icon />
@@ -82,9 +87,9 @@ function ReactionPicker({ postId} : {postId:string}) {
                     //the problem i faced there was complicated logic to apply classes like is these are true apply this class if it turns false dont
                     //but here we define a class and add a animation prop and elements with that class will animate no fuss
                     //also the reason i can use a potentially non unique value as key case each reaction component with key reaction can have only 1 child count so its ok to use it for rerender
-                    //key={value}
-                    //className={styles.count} 
-                    className={`${animating === key ? styles.count : ""}`} 
+                    key={value}
+                    className={styles.count} 
+                    //className={`${animating === key ? styles.count : ""}`} 
 
                     style={{textAlign:"center"}}>{value}</div>
             </div>
