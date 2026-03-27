@@ -98,17 +98,18 @@ export const postsApi = createApi(
                     }
                 }),
                 addReaction: builder.mutation({
-                    query:({postId, reactionType, userReaction})=>{
+                    query:({postId, reactionType})=>{
                         return {
                             url:`/reaction`,
                             method:'POST',
-                            body: {postId, reactionType, userReaction}
+                            body: {postId, reactionType}
                         }
                     },
-                    async onQueryStarted({postId, reactionType:type, userReaction:previousType}, lifecycleApi) {
+                    async onQueryStarted({postId, reactionType:type}, lifecycleApi) {
                         //await delay(3000)
                         const getPostsPatchResult = lifecycleApi.dispatch(postsApi.util.updateQueryData('fetchPosts', undefined, (draft) => {
                                 const post = draft.entities[postId]
+                                const previousType = post.userReaction
                                 if(!previousType) {
                                     post.reactionCounts[type as ReactionType] +=1
                                     post.userReaction = type

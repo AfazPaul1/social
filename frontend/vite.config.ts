@@ -17,7 +17,7 @@ export default defineConfig(({mode}) => {
   ],
   server: {
     host: '0.0.0.0',
-    post: 5173,
+    port: 5173,
     allowedHosts: [env.VITE_ALLOWED_HOST]
   }
   }

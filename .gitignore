@@ -4,3 +4,4 @@ backend/src/posts.cleaned.jsonl
 backend/src/posts.jsonl
 frontend/src/routeTree.gen.ts
 commit.md
+frontend/src/components/misx.html
