@@ -32,8 +32,6 @@ function ReactionPicker({ postId} : {postId:string}) {
         try {
             if(loggedInUserId) await addReaction({postId, reactionType}).unwrap()
         } finally {
-            console.log("inFlightRef.current",inFlightRef.current);
-            
             inFlightRef.current = false
         }
     },
@@ -48,6 +46,7 @@ function ReactionPicker({ postId} : {postId:string}) {
             postId={postId} 
             reactionType={key as ReactionType} 
             onClick={handleClickStable}
+            inFlightRef={inFlightRef}
             ></ReactionButton>
         )
     })

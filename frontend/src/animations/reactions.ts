@@ -1,16 +1,17 @@
-export const popAnimation = (el:HTMLElement) => {
-    el.animate(
-        [
-             {transform: 'scale(1) rotate(0deg)'},
-             {transform:'scale(1.6) rotate(10deg)'},
-             {transform:'scale(1.3) rotate(0deg)'},
-        ],
-         {
-            duration:300,
-            easing:'ease',
-            composite:'add'
-         }
-    )
+export const popAnimation = (el: HTMLElement) => {
+  el.animate(
+    [
+      {transform: 'scale(1) rotate(0deg)'},
+      {transform:'scale(1.25) rotate(12deg)'},
+      {transform: 'scale(1.5) rotate(40deg)'},
+      {transform:'scale(1) rotate(0deg)'},
+    ],
+    {
+      duration: 380,
+      easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      //fill:"forwards" //using size to show state is not a good idea apparently. facebook youtube only use color changes. ig material ui things. also avoids layout issues etc. lets not persist animation states
+    }
+  )
 }
 export const bumpAnimation = (el: HTMLElement) => {
   el.animate(

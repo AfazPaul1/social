@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../../store";
 import { createEntityAdapter, createSelector, type EntityState } from "@reduxjs/toolkit";
-import { delay } from "../../utils/delay";
+//import { delay } from "../../utils/delay";
 //import {delay} from '../../utils/delay'
 //gues i need to change this type everytime i change the api response
 export type reactionCountsType =  Record<ReactionType, number>
@@ -143,19 +143,3 @@ const getPostsData = createSelector(getPostsResult, result => result.data ?? ini
 
 export const {useAddPostsMutation, useEditPostMutation, useFetchPostsQuery, useFetchPostsByIdQuery, useAddReactionMutation} = postsApi
 export const {selectAll: selectAllPosts, selectById: selectPostByIdFromPosts, selectIds} = postsAdaptor.getSelectors(getPostsData)
-export const selectPostsFromAnywhere = createSelector(
-    [   
-        (state: RootState, postId:string) => selectPostByIdFromPosts(state, postId),
-        (state: RootState, postId:string) => postsApi.endpoints.fetchPostsById.select(postId)(state).data
-    ],
-    (postFromList, postFromQuery) => {
-    if (postFromList) {
-      console.log('Source: Normalized List Cache');
-      return postFromList;
-    }
-    if (postFromQuery) {
-      console.log('Source: Single Post Query Cache');
-      return postFromQuery;
-    }
-  } 
-)
